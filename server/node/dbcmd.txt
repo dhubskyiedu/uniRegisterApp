@@ -1,0 +1,59 @@
+CREATE TABLE Users (
+	username VARCHAR(255) PRIMARY KEY,
+	email VARCHAR(255),
+	fName VARCHAR(255),
+	lName VARCHAR(255),
+	accessL INT,
+	groupID VARCHAR(4),
+	FOREIGN KEY(groupID) REFERENCES Groups(groupID) ON DELETE CASCADE
+);
+CREATE TABLE Auth (
+	username VARCHAR(255),
+	password VARCHAR(255),
+	FOREIGN KEY(username) REFERENCES Users(username) ON DELETE CASCADE
+);
+CREATE TABLE Courses (
+	courseID VARCHAR(4) PRIMARY KEY,
+	name VARCHAR(255),
+	description VARCHAR(255)
+);
+CREATE TABLE Groups (
+	groupID VARCHAR(255) PRIMARY KEY,
+	courseID VARCHAR(255),
+	FOREIGN KEY(courseID) references Courses(courseID) ON DELETE CASCADE
+);
+CREATE TABLE Subjects (
+	subjectID VARCHAR(4) PRIMARY KEY,
+	name VARCHAR(255),
+	description VARCHAR(255)
+);
+CREATE TABLE Curriculum (
+	courseID VARCHAR(4),
+	subjectID VARCHAR(4),
+	FOREIGN KEY(courseID) REFERENCES Courses(courseID) ON DELETE CASCADE,
+	FOREIGN KEY(subjectID) REFERENCES Subjects(subjectID) ON DELETE CASCADE
+);
+CREATE TABLE Classes (
+	classID VARCHAR(4) PRIMARY KEY,
+	username VARCHAR(255),
+	groupID VARCHAR(4),
+	subjectID VARCHAR(4),
+	FOREIGN KEY(subjectID) REFERENCES Subjects(subjectID) ON DELETE CASCADE,
+	FOREIGN KEY(username) REFERENCES Users(username) ON DELETE CASCADE,
+	FOREIGN KEY(groupID) REFERENCES Groups(groupID) ON DELETE CASCADE
+);
+CREATE TABLE Grades (
+	username VARCHAR(255),
+	subjectID VARCHAR(4),
+	grade INT,
+	gradePoint INT,
+	FOREIGN KEY(subjectID) REFERENCES Subjects(subjectID) ON DELETE CASCADE,
+	FOREIGN KEY(username) REFERENCES Users(username) ON DELETE CASCADE
+);
+CREATE TABLE Schedule (
+	classID VARCHAR(4),
+	day INT,
+	timeStart TIME,
+	timeEnd TIME,
+	FOREIGN KEY(classID) REFERENCES Classes(classID) ON DELETE CASCADE
+);
