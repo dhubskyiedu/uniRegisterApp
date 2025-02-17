@@ -15,39 +15,56 @@ app.get("/", (req, res) => {
     dbops.x()
 })
 
-app.post("/createUser", (req, res) => {
-    //console.log("YES")
+app.post("/api/user", async (req, res) => {
     uname = req.body.uname
     passwd = req.body.passwd
     email = req.body.email
     fname = req.body.fname
     lname = req.body.lname
     alevel = req.body.alevel
-    if(uname != null && passwd != null){
-        if(email != null && alevel != null){
-            if(fname != null && lname != null){
-                if(dbops.createUser(
-                    req.body.uname,
-                    req.body.passwd,
-                    req.body.email,
-                    req.body.fname,
-                    req.body.lname,
-                    req.body.alevel
-                )){
-                    res.status(200).send("Success")
-                    return
-                }
-            }
+    if(((uname != null && passwd != null) && (email != null && alevel != null)) && (fname != null && lname != null)){
+        result = await dbops.createUser(
+            req.body.uname,
+            req.body.passwd,
+            req.body.email,
+            req.body.fname,
+            req.body.lname,
+            req.body.alevel
+        )
+        if(result){
+            res.sendStatus(204)
+        }else{
+            res.status(500).send("Server error")
         }
+    }else{
+        res.status(400).send("Wrong input error")
     }
-    res.status(400).send("Error")
 })
-
-app.get("/getUser/:uname", async (req, res) => {
+app.get("/api/user/:uname", async (req, res) => {
     user = await dbops.getUser(req.params.uname)
     if(user){
         res.status(200).send(user)
     }else{
-        res.status(400).send("No found")
+        res.status(404).send("Not found")
+    }
+})
+app.delete("/api/user", async (req, res) => {
+    result = await dbops.deleteUser(req.body.uname)
+    if(result){
+        res.sendStatus(204)
+    }else{
+        res.status(500).send("Server error")
+    }
+})
+app.put("/api/user", async (req, res) => {
+    try{
+        result = await dbops.alterUser(req.body)
+    }catch(e){
+        result = false
+    }
+    if(result){
+        res.sendStatus(204)
+    }else{
+        res.status(500).send("Server error")
     }
 })
