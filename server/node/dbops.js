@@ -62,7 +62,6 @@ async function deleteUser(uname){
 }
 
 async function alterUser(info){
-    console.log(info)
     return new Promise((resolve, reject) => {
         sql = `UPDATE Users SET `
         props = []
@@ -78,7 +77,146 @@ async function alterUser(info){
         sql += ` WHERE username = ?;`
         db.run(sql, props, (err) => {
             if(err != null){
-                console.log("ERROR")
+                reject(false)
+            }else{
+                resolve(true)
+            }
+        })
+    })
+}
+
+async function createCourse(id, name, desc){
+    return new Promise((resolve, reject) => {
+        db.run(`INSERT INTO Courses VALUES (?, ?, ?);`,
+        [id, name, desc], (err) => {
+            if(err != null){
+                reject(false)
+            }else{
+                resolve(true)
+            }
+        }
+        )
+    })
+}
+
+async function getCourse(id){
+    return new Promise((resolve, reject) => {
+        db.get(`SELECT * FROM Courses WHERE courseID = ?;`,
+            [id], (err, rows) => {
+                if(err != null){
+                    reject(false)
+                }else{
+                    resolve(rows)
+                }
+            }
+        )
+    })
+}
+
+async function deleteCourse(id){
+    return new Promise((resolve, reject) => {
+        db.run(`DELETE FROM Courses WHERE courseID = ?;`,
+            [id], (err) => {
+                if(err != null){
+                    reject(false)
+                }else{
+                    resolve(true)
+                }
+            }
+        )
+    })
+}
+
+async function alterCourse(info){
+    return new Promise((resolve, reject) => {
+        sql = `UPDATE Courses SET `
+        props = []
+        for(prop in info){
+            //console.log("Prop: "+prop+", val: "+info[prop])
+            if(prop != "courseid"){
+                sql += prop + ` = ?, `
+                props.push(info[prop])
+            }
+        }
+        props.push(info.courseid)
+        sql = sql.slice(0, sql.length-2)
+        sql += ` WHERE courseID = ?;`
+        db.run(sql, props, (err) => {
+            if(err != null){
+                reject(false)
+            }else{
+                resolve(true)
+            }
+        })
+    })
+}
+
+async function createGroup(groupID, courseID){
+    return new Promise((resolve, reject) => {
+        if(groupID == null || courseID == null){
+            reject(false)
+        }else{
+            db.run(`INSERT INTO Groups VALUES (?, ?);`,
+            [groupID, courseID], (err) => {
+                if(err != null){
+                    reject(false)
+                }else{
+                    resolve(true)
+                }
+            }
+            )
+        }
+    })
+}
+async function getGroup(id){
+    return new Promise((resolve, reject) => {
+        if(id == null){
+            reject(false)
+        }else{
+            db.get(`SELECT * FROM Groups WHERE groupID = ?;`,
+                [id], (err, rows) => {
+                    if(err != null){
+                        reject(false)
+                    }else{
+                        resolve(rows)
+                    }
+                }
+            )
+        }
+    })
+}
+async function deleteGroup(id){
+    return new Promise((resolve, reject) => {
+        if(id == null){
+            reject(false)
+        }else{
+            db.run(`DELETE FROM Groups WHERE groupID = ?;`,
+                [id], (err) => {
+                    if(err != null){
+                        reject(false)
+                    }else{
+                        resolve(true)
+                    }
+                }
+            )
+        }
+    })
+}
+async function alterGroup(info){
+    return new Promise((resolve, reject) => {
+        sql = `UPDATE Groups SET `
+        props = []
+        for(prop in info){
+            if(prop != "groupid"){
+                sql += prop + ` = ?, `
+                props.push(info[prop])
+            }
+        }
+        props.push(info.groupid)
+        sql = sql.slice(0, sql.length-2)
+        sql += ` WHERE groupID = ?;`
+        db.run(sql, props, (err) => {
+            if(err != null){
                 reject(false)
             }else{
                 resolve(true)
@@ -91,5 +229,13 @@ module.exports = {
     createUser,
     getUser,
     deleteUser,
-    alterUser
+    alterUser,
+    createCourse,
+    getCourse,
+    deleteCourse,
+    alterCourse,
+    createGroup,
+    getGroup,
+    deleteGroup,
+    alterGroup
 }

@@ -15,6 +15,7 @@ app.get("/", (req, res) => {
     dbops.x()
 })
 
+// USERS
 app.post("/api/user", async (req, res) => {
     uname = req.body.uname
     passwd = req.body.passwd
@@ -67,4 +68,104 @@ app.put("/api/user", async (req, res) => {
     }else{
         res.status(500).send("Server error")
     }
+})
+
+// COURSES
+app.post("/api/course", async (req, res) => {
+    courseID = req.body.courseid;
+    courseName = req.body.name;
+    courseDesc = req.body.description;
+    if((courseID != null && courseName != null) && courseDesc != null){
+        try{
+            result = await dbops.createCourse(courseID, courseName, courseDesc)
+        }catch(e){
+            result = false
+        }
+        if(result){
+            res.sendStatus(204)
+        }else{
+            res.status(500).send("Server error")
+        }
+    }else{
+        res.status(400).send("Wrong input error")
+    }
+})
+app.get("/api/course/:id", async (req, res) => {
+    course = await dbops.getCourse(req.params.id)
+    if(course){
+        res.status(200).send(course)
+    }else{
+        res.status(404).send("Not found")
+    }
+})
+app.delete("/api/course", async (req, res) => {
+    /*try{
+        result = await dbops.deleteCourse(req.body.courseid)
+    }catch(e){
+        result = false
+    }
+    if(result){
+        res.sendStatus(204)
+    }else{
+        res.status(500).send("Server error")
+    }*/
+    dbops.deleteCourse(req.body.courseid)
+    .then((result) => {
+        res.sendStatus(204)
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
+})
+app.put("/api/course", async (req, res) => {
+    dbops.alterCourse(req.body)
+    .then((result) => {
+        res.sendStatus(204)
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
+})
+
+// Groups
+app.post("/api/group", async (req, res) => {
+    groupID = req.body.id
+    courseID = req.body.courseid
+    dbops.createGroup(groupID, courseID)
+    .then((result) => {
+        res.sendStatus(204)
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
+})
+app.get("/api/group/:id", async (req, res) => {
+    try{
+        result = await dbops.getGroup(req.params.id)
+        if(result != null){
+            res.status(200).send(result)
+        }else{
+            res.status(404).send("Not found")
+        }
+    }catch(e){
+        res.status(500).send("Server error")
+    }
+})
+app.delete("/api/group", async (req, res) => {
+    dbops.deleteGroup(req.body.groupid)
+    .then((result) => {
+        res.sendStatus(204)
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
+})
+app.put("/api/group", async (req, res) => {
+    dbops.alterGroup(req.body)
+    .then((result) => {
+        res.sendStatus(204)
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
 })
