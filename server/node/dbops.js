@@ -7,6 +7,7 @@ const db = new sqlite.Database("./data.db", sqlite.OPEN_READWRITE, (err) => {
     }
 })
 
+// USERS
 async function createUser(uname, passwd, email, fname, lname, alevel){
     return new Promise((resolve, reject) => {
         db.run(`INSERT INTO Users(username, email, fName, lName, accessL) VALUES (?, ?, ?, ?, ?);`,
@@ -85,6 +86,7 @@ async function alterUser(info){
     })
 }
 
+// COURSES
 async function createCourse(id, name, desc){
     return new Promise((resolve, reject) => {
         db.run(`INSERT INTO Courses VALUES (?, ?, ?);`,
@@ -151,6 +153,7 @@ async function alterCourse(info){
     })
 }
 
+// GROUPS
 async function createGroup(groupID, courseID){
     return new Promise((resolve, reject) => {
         if(groupID == null || courseID == null){
@@ -225,6 +228,69 @@ async function alterGroup(info){
     })
 }
 
+// SUBJECTS
+async function createSubject(id, name, desc){
+    return new Promise((resolve, reject) => {
+        db.run(`INSERT INTO Subjects VALUES (?, ?, ?);`,
+            [id, name, desc], (err) => {
+                if(err){
+                    reject(err)
+                }else{
+                    resolve()
+                }
+            }
+        )
+    })
+}
+async function getSubject(id){
+    return new Promise((resolve, reject) => {
+        db.get(`SELECT * FROM Subjects WHERE subjectID = ?;`,
+            [id], (err, rows) => {
+                if(err){
+                    reject(err)
+                }else{
+                    resolve(rows)
+                }
+            }
+        )
+    })
+}
+async function deleteSubject(id){
+    return new Promise((resolve, reject) => {
+        db.run(`DELETE FROM Subjects WHERE subjectID = ?;`,
+            [id], (err) => {
+                if(err){
+                    reject(err)
+                }else{
+                    resolve()
+                }
+            }
+        )
+    })
+}
+async function alterSubject(info){
+    return new Promise((resolve, reject) => {
+        sql = `UPDATE Subjects SET `
+        props = []
+        for(prop in info){
+            if(prop != "subjectid"){
+                sql += prop + ` = ?, `
+                props.push(info[prop])
+            }
+        }
+        props.push(info.subjectid)
+        sql = sql.slice(0, sql.length-2)
+        sql += ` WHERE subjectID = ?;`
+        db.run(sql, props, (err) => {
+            if(err){
+                reject(err)
+            }else{
+                resolve()
+            }
+        })
+    })
+}
+
 module.exports = {
     createUser,
     getUser,
@@ -237,5 +303,9 @@ module.exports = {
     createGroup,
     getGroup,
     deleteGroup,
-    alterGroup
+    alterGroup,
+    createSubject,
+    getSubject,
+    deleteSubject,
+    alterSubject
 }

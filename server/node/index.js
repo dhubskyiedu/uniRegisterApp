@@ -129,7 +129,7 @@ app.put("/api/course", async (req, res) => {
 
 // Groups
 app.post("/api/group", async (req, res) => {
-    groupID = req.body.id
+    groupID = req.body.groupid
     courseID = req.body.courseid
     dbops.createGroup(groupID, courseID)
     .then((result) => {
@@ -162,6 +162,55 @@ app.delete("/api/group", async (req, res) => {
 })
 app.put("/api/group", async (req, res) => {
     dbops.alterGroup(req.body)
+    .then((result) => {
+        res.sendStatus(204)
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
+})
+
+// Subjects
+app.post("/api/subject", (req, res) => {
+    subjectid = req.body.subjectid
+    subjectdesc = req.body.description
+    subjectname = req.body.name
+    if((subjectid && subjectdesc) && subjectname){
+        dbops.createSubject(subjectid, subjectname, subjectdesc)
+        .then((result) => {
+            res.sendStatus(204)
+        })
+        .catch((err) => {
+            res.status(500).send("Server error")
+        })
+    }else{
+        res.status(400).send("Wrong input error")
+    }
+})
+app.get("/api/subject/:id", (req, res) => {
+    dbops.getSubject(req.params.id)
+    .then((result) => {
+        if(result){
+            res.status(200).send(result)
+        }else{
+            res.status(404).send("Not found")
+        }
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
+})
+app.delete("/api/subject", (req, res) => {
+    dbops.deleteSubject(req.body.subjectid)
+    .then((result) => {
+        res.sendStatus(204)
+    })
+    .catch((err) => {
+        res.status(500).send("Server error")
+    })
+})
+app.put("/api/subject", (req, res) => {
+    dbops.alterSubject(req.body)
     .then((result) => {
         res.sendStatus(204)
     })
