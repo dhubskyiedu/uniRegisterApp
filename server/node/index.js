@@ -12,11 +12,11 @@ app.listen(3000, () => {
 
 // USERS
 app.post("/api/user", async (req, res) => {
-    uname = req.body.uname
-    passwd = req.body.passwd
+    uname = req.body.username
+    passwd = req.body.password
     email = req.body.email
-    fname = req.body.fname
-    lname = req.body.lname
+    fname = req.body.fName
+    lname = req.body.lName
     alevel = req.body.alevel
     result = false
     try{
@@ -54,6 +54,15 @@ app.get("/api/user/:uname", async (req, res) => {
         res.sendStatus(500)
     }
 })
+app.get("/api/users", async (req, res) => {
+    dbops.getUsers(req.query.info)
+    .then((result) => {
+        res.status(200).send(result)
+    })
+    .catch((err) => {
+        res.sendStatus(500)
+    })
+})
 app.delete("/api/user", async (req, res) => {
     try{
         await dbops.deleteUser(req.body.uname)
@@ -73,7 +82,7 @@ app.put("/api/user", async (req, res) => {
 
 // COURSES
 app.post("/api/course", async (req, res) => {
-    courseID = req.body.courseid;
+    courseID = req.body.courseID;
     courseName = req.body.name;
     courseDesc = req.body.description;
     try{
@@ -97,8 +106,17 @@ app.get("/api/course/:id", async (req, res) => {
         res.status(404).send("Not found")
     }
 })
+app.get("/api/courses", async (req, res) => {
+    dbops.getCourses(req.query.info)
+    .then((result) => {
+        res.status(200).send(result)
+    })
+    .catch((err) => {
+        res.sendStatus(500)
+    })
+})
 app.delete("/api/course", async (req, res) => {
-    dbops.deleteCourse(req.body.courseid)
+    dbops.deleteCourse(req.body.courseID)
     .then((result) => {
         res.sendStatus(204)
     })
@@ -118,8 +136,8 @@ app.put("/api/course", async (req, res) => {
 
 // Groups
 app.post("/api/group", async (req, res) => {
-    groupID = req.body.groupid
-    courseID = req.body.courseid
+    groupID = req.body.groupID
+    courseID = req.body.courseID
     dbops.createGroup(groupID, courseID)
     .then((result) => {
         res.sendStatus(204)
@@ -146,8 +164,17 @@ app.get("/api/group/:id", async (req, res) => {
         res.sendStatus(500)
     }
 })
+app.get("/api/groups", async (req, res) => {
+    dbops.getGroups(req.query.info)
+    .then((result) => {
+        res.status(200).send(result)
+    })
+    .catch((err) => {
+        res.sendStatus(500)
+    })
+})
 app.delete("/api/group", async (req, res) => {
-    dbops.deleteGroup(req.body.groupid)
+    dbops.deleteGroup(req.body.groupID)
     .then((result) => {
         res.sendStatus(204)
     })
@@ -167,7 +194,7 @@ app.put("/api/group", async (req, res) => {
 
 // Subjects
 app.post("/api/subject", (req, res) => {
-    subjectid = req.body.subjectid
+    subjectid = req.body.subjectID
     subjectdesc = req.body.description
     subjectname = req.body.name
         dbops.createSubject(subjectid, subjectname, subjectdesc)
@@ -197,8 +224,17 @@ app.get("/api/subject/:id", (req, res) => {
         res.sendStatus(500)
     })
 })
+app.get("/api/subjects", async (req, res) => {
+    dbops.getSubjects(req.query.info)
+    .then((result) => {
+        res.status(200).send(result)
+    })
+    .catch((err) => {
+        res.sendStatus(500)
+    })
+})
 app.delete("/api/subject", (req, res) => {
-    dbops.deleteSubject(req.body.subjectid)
+    dbops.deleteSubject(req.body.subjectID)
     .then((result) => {
         res.sendStatus(204)
     })

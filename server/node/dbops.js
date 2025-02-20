@@ -64,6 +64,35 @@ async function getUser(uname){
     })
 }
 
+// All existing users
+// Fields selected by query, e.g.: ?info=username,fName,email
+async function getUsers(info){
+    return new Promise((resolve, reject) => {
+        db.all(`SELECT * FROM Users;`,
+            [], (err, rows) => {
+                if(err){
+                    reject()
+                }else{
+                    if(info != null){
+                        result = []
+                        infoArr = info.split(",")
+                        for(i of rows){
+                            obj = new Object()
+                            for(j of infoArr){
+                                obj[j] = i[j]
+                            }
+                            result.push(obj)
+                        }
+                        resolve(result)
+                    }else{
+                        resolve(rows)
+                    }
+                    
+                }
+            }
+        )
+    })
+}
 async function deleteUser(uname){
     return new Promise((resolve, reject) => {
         db.run(`DELETE FROM Users WHERE username = ?;`,
@@ -160,6 +189,34 @@ async function getCourse(id){
     })
 }
 
+async function getCourses(info){
+    return new Promise((resolve, reject) => {
+        db.all(`SELECT * FROM Courses;`,
+            [], (err, rows) => {
+                if(err){
+                    reject()
+                }else{
+                    if(info != null){
+                        result = []
+                        infoArr = info.split(",")
+                        for(i of rows){
+                            obj = new Object()
+                            for(j of infoArr){
+                                obj[j] = i[j]
+                            }
+                            result.push(obj)
+                        }
+                        resolve(result)
+                    }else{
+                        resolve(rows)
+                    }
+                    
+                }
+            }
+        )
+    })
+}
+
 async function deleteCourse(id){
     return new Promise((resolve, reject) => {
         db.run(`DELETE FROM Courses WHERE courseID = ?;`,
@@ -238,6 +295,35 @@ async function getGroup(id){
         }
     })
 }
+
+async function getGroups(info){
+    return new Promise((resolve, reject) => {
+        db.all(`SELECT * FROM Groups;`,
+            [], (err, rows) => {
+                if(err){
+                    reject()
+                }else{
+                    if(info != null){
+                        result = []
+                        infoArr = info.split(",")
+                        for(i of rows){
+                            obj = new Object()
+                            for(j of infoArr){
+                                obj[j] = i[j]
+                            }
+                            result.push(obj)
+                        }
+                        resolve(result)
+                    }else{
+                        resolve(rows)
+                    }
+                    
+                }
+            }
+        )
+    })
+}
+
 async function deleteGroup(id){
     return new Promise((resolve, reject) => {
         if(id == null){
@@ -305,6 +391,35 @@ async function getSubject(id){
         )
     })
 }
+
+async function getSubjects(info){
+    return new Promise((resolve, reject) => {
+        db.all(`SELECT * FROM Subjects;`,
+            [], (err, rows) => {
+                if(err){
+                    reject()
+                }else{
+                    if(info != null){
+                        result = []
+                        infoArr = info.split(",")
+                        for(i of rows){
+                            obj = new Object()
+                            for(j of infoArr){
+                                obj[j] = i[j]
+                            }
+                            result.push(obj)
+                        }
+                        resolve(result)
+                    }else{
+                        resolve(rows)
+                    }
+                    
+                }
+            }
+        )
+    })
+}
+
 async function deleteSubject(id){
     return new Promise((resolve, reject) => {
         db.run(`DELETE FROM Subjects WHERE subjectID = ?;`,
@@ -344,18 +459,22 @@ async function alterSubject(info){
 module.exports = {
     createUser,
     getUser,
+    getUsers,
     deleteUser,
     alterUser,
     createCourse,
     getCourse,
+    getCourses,
     deleteCourse,
     alterCourse,
     createGroup,
     getGroup,
+    getGroups,
     deleteGroup,
     alterGroup,
     createSubject,
     getSubject,
+    getSubjects,
     deleteSubject,
     alterSubject
 }
