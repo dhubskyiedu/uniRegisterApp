@@ -10,21 +10,43 @@ const db = new sqlite.Database("./data.db", sqlite.OPEN_READWRITE, (err) => {
 // USERS
 async function createUser(uname, passwd, email, fname, lname, alevel){
     return new Promise((resolve, reject) => {
-        db.run(`INSERT INTO Users(username, email, fName, lName, accessL) VALUES (?, ?, ?, ?, ?);`,
+        // data verification
+        valid = uname && passwd // data is not null
+        valid &&= email && alevel
+        valid &&= fname && lname
+        valid &&= uname.length <= 255 && passwd.length <= 255
+        valid &&= email.length <= 255 && alevel.length <= 255
+        valid &&= fname.length <= 255 && lname.length <= 255
+        if(valid){
+            // db operation
+            db.run(`INSERT INTO Users(username, email, fName, lName, accessL) VALUES (?, ?, ?, ?, ?);`,
             [uname, email, fname, lname, alevel], (err) => {
                 if(err){
-                    reject(false)
+                    if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
+                        reject(1) // error code 1 - user exists
+                    }else{
+                        reject()
+                    }
+                }else{
+                    db.run(`INSERT INTO Auth VALUES (?, ?);`,
+                        [uname, passwd], (err) => {
+                            if(err){
+                                if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
+                                    reject(1) // error code 1 - user exists
+                                }else{
+                                    reject()
+                                }
+                            }else{
+                                resolve()
+                            }
+                        }
+                    )
                 }
             }
-        )
-        db.run(`INSERT INTO Auth VALUES (?, ?);`,
-            [uname, passwd], (err) => {
-                if(err){
-                    reject(false)
-                }
-            }
-        )
-        resolve(true)
+            )
+        }else{
+            reject(2) // error code 2 - too lengthy inputs
+        }
     })
 }
 
@@ -33,7 +55,7 @@ async function getUser(uname){
         db.get(`SELECT * FROM Users WHERE username = ?;`,
             [uname], (err, rows) => {
                 if(err){
-                    reject(false)
+                    reject()
                 }else{
                     resolve(rows)
                 }
@@ -47,18 +69,18 @@ async function deleteUser(uname){
         db.run(`DELETE FROM Users WHERE username = ?;`,
             [uname], (err) => {
                 if(err){
-                    reject(false)
+                    reject()
                 }
             }
         )
         db.run(`DELETE FROM Auth WHERE username = ?;`,
             [uname], (err) => {
                 if(err){
-                    reject(false)
+                    reject()
                 }
             }
         )
-        resolve(true)
+        resolve()
     })
 }
 
@@ -68,19 +90,30 @@ async function alterUser(info){
         props = []
         for(prop in info){
             //console.log("Prop: "+prop+", val: "+info[prop])
-            if(prop != "uname"){
-                sql += prop + ` = ?, `
-                props.push(info[prop])
+            if(prop != "username"){
+                if(prop == "password"){
+                    db.run(`UPDATE Auth SET password = ? WHERE username = ?;`,
+                        [info.password], (err) => {
+                            if(err){
+                                reject()
+                            }
+                        }
+                    )
+                }else{
+                    sql += prop + ` = ?, `
+                    props.push(info[prop])
+                }
             }
         }
-        props.push(info.uname)
+        props.push(info.username)
         sql = sql.slice(0, sql.length-2)
         sql += ` WHERE username = ?;`
         db.run(sql, props, (err) => {
-            if(err != null){
-                reject(false)
+            if(err){
+                console.log(err)
+                reject()
             }else{
-                resolve(true)
+                resolve()
             }
         })
     })
@@ -89,15 +122,27 @@ async function alterUser(info){
 // COURSES
 async function createCourse(id, name, desc){
     return new Promise((resolve, reject) => {
-        db.run(`INSERT INTO Courses VALUES (?, ?, ?);`,
-        [id, name, desc], (err) => {
-            if(err != null){
-                reject(false)
-            }else{
-                resolve(true)
+        valid = id && name
+        valid &&= desc
+        valid &&= id.length <= 255 && name.length <= 255
+        valid &&= desc.length <= 255
+        if(valid){
+            db.run(`INSERT INTO Courses VALUES (?, ?, ?);`,
+            [id, name, desc], (err) => {
+                if(err){
+                    if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
+                        reject(1) // error code 1 - course exists
+                    }else{
+                        reject()
+                    }
+                }else{
+                    resolve()
+                }
             }
+            )
+        }else{
+            reject(2) // error code 2 - invalid input
         }
-        )
     })
 }
 
@@ -105,8 +150,8 @@ async function getCourse(id){
     return new Promise((resolve, reject) => {
         db.get(`SELECT * FROM Courses WHERE courseID = ?;`,
             [id], (err, rows) => {
-                if(err != null){
-                    reject(false)
+                if(err){
+                    reject()
                 }else{
                     resolve(rows)
                 }
@@ -119,10 +164,10 @@ async function deleteCourse(id){
     return new Promise((resolve, reject) => {
         db.run(`DELETE FROM Courses WHERE courseID = ?;`,
             [id], (err) => {
-                if(err != null){
-                    reject(false)
+                if(err){
+                    reject()
                 }else{
-                    resolve(true)
+                    resolve()
                 }
             }
         )
@@ -134,7 +179,6 @@ async function alterCourse(info){
         sql = `UPDATE Courses SET `
         props = []
         for(prop in info){
-            //console.log("Prop: "+prop+", val: "+info[prop])
             if(prop != "courseid"){
                 sql += prop + ` = ?, `
                 props.push(info[prop])
@@ -144,10 +188,10 @@ async function alterCourse(info){
         sql = sql.slice(0, sql.length-2)
         sql += ` WHERE courseID = ?;`
         db.run(sql, props, (err) => {
-            if(err != null){
-                reject(false)
+            if(err){
+                reject()
             }else{
-                resolve(true)
+                resolve()
             }
         })
     })
@@ -156,15 +200,21 @@ async function alterCourse(info){
 // GROUPS
 async function createGroup(groupID, courseID){
     return new Promise((resolve, reject) => {
-        if(groupID == null || courseID == null){
-            reject(false)
+        valid = groupID && courseID
+        valid &&= groupID.length <= 255 && courseID.length <= 255
+        if(!valid){
+            reject(2) // error code 2 - invalid input
         }else{
             db.run(`INSERT INTO Groups VALUES (?, ?);`,
             [groupID, courseID], (err) => {
-                if(err != null){
-                    reject(false)
+                if(err){
+                    if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
+                        reject(1) // error code 1 - group exists
+                    }else{
+                        reject()
+                    }
                 }else{
-                    resolve(true)
+                    resolve()
                 }
             }
             )
@@ -174,12 +224,12 @@ async function createGroup(groupID, courseID){
 async function getGroup(id){
     return new Promise((resolve, reject) => {
         if(id == null){
-            reject(false)
+            reject()
         }else{
             db.get(`SELECT * FROM Groups WHERE groupID = ?;`,
                 [id], (err, rows) => {
-                    if(err != null){
-                        reject(false)
+                    if(err){
+                        reject()
                     }else{
                         resolve(rows)
                     }
@@ -191,14 +241,14 @@ async function getGroup(id){
 async function deleteGroup(id){
     return new Promise((resolve, reject) => {
         if(id == null){
-            reject(false)
+            reject()
         }else{
             db.run(`DELETE FROM Groups WHERE groupID = ?;`,
                 [id], (err) => {
-                    if(err != null){
-                        reject(false)
+                    if(err){
+                        reject()
                     }else{
-                        resolve(true)
+                        resolve()
                     }
                 }
             )
@@ -219,10 +269,10 @@ async function alterGroup(info){
         sql = sql.slice(0, sql.length-2)
         sql += ` WHERE groupID = ?;`
         db.run(sql, props, (err) => {
-            if(err != null){
-                reject(false)
+            if(err){
+                reject()
             }else{
-                resolve(true)
+                resolve()
             }
         })
     })
@@ -234,7 +284,7 @@ async function createSubject(id, name, desc){
         db.run(`INSERT INTO Subjects VALUES (?, ?, ?);`,
             [id, name, desc], (err) => {
                 if(err){
-                    reject(err)
+                    reject()
                 }else{
                     resolve()
                 }
@@ -247,7 +297,7 @@ async function getSubject(id){
         db.get(`SELECT * FROM Subjects WHERE subjectID = ?;`,
             [id], (err, rows) => {
                 if(err){
-                    reject(err)
+                    reject()
                 }else{
                     resolve(rows)
                 }
@@ -260,7 +310,7 @@ async function deleteSubject(id){
         db.run(`DELETE FROM Subjects WHERE subjectID = ?;`,
             [id], (err) => {
                 if(err){
-                    reject(err)
+                    reject()
                 }else{
                     resolve()
                 }
@@ -283,7 +333,7 @@ async function alterSubject(info){
         sql += ` WHERE subjectID = ?;`
         db.run(sql, props, (err) => {
             if(err){
-                reject(err)
+                reject()
             }else{
                 resolve()
             }

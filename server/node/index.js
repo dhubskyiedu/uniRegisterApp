@@ -10,11 +10,6 @@ app.listen(3000, () => {
     console.log("Server is listening on port 3000")
 })
 
-app.get("/", (req, res) => {
-    res.send("it works!")
-    dbops.x()
-})
-
 // USERS
 app.post("/api/user", async (req, res) => {
     uname = req.body.uname
@@ -23,8 +18,9 @@ app.post("/api/user", async (req, res) => {
     fname = req.body.fname
     lname = req.body.lname
     alevel = req.body.alevel
-    if(((uname != null && passwd != null) && (email != null && alevel != null)) && (fname != null && lname != null)){
-        result = await dbops.createUser(
+    result = false
+    try{
+        await dbops.createUser(
             req.body.uname,
             req.body.passwd,
             req.body.email,
@@ -32,41 +28,46 @@ app.post("/api/user", async (req, res) => {
             req.body.lname,
             req.body.alevel
         )
-        if(result){
-            res.sendStatus(204)
+        result = true
+    }catch(e){
+        if(e == 1){
+            res.status(400).send("User already exists")
+        }else if(e == 2){
+            res.status(400).send("Exceeded maximum size or incomplete input")
         }else{
-            res.status(500).send("Server error")
+            res.sendStatus(500)
         }
-    }else{
-        res.status(400).send("Wrong input error")
+    }
+    if(result){
+        res.sendStatus(204)
     }
 })
 app.get("/api/user/:uname", async (req, res) => {
-    user = await dbops.getUser(req.params.uname)
-    if(user){
-        res.status(200).send(user)
-    }else{
-        res.status(404).send("Not found")
+    try{
+        user = await dbops.getUser(req.params.uname)
+        if(user){
+            res.status(200).send(user)
+        }else{
+            res.status(404).send("Not found")
+        }
+    }catch(e){
+        res.sendStatus(500)
     }
 })
 app.delete("/api/user", async (req, res) => {
-    result = await dbops.deleteUser(req.body.uname)
-    if(result){
+    try{
+        await dbops.deleteUser(req.body.uname)
         res.sendStatus(204)
-    }else{
-        res.status(500).send("Server error")
+    }catch(e){
+        res.sendStatus(500)
     }
 })
 app.put("/api/user", async (req, res) => {
     try{
-        result = await dbops.alterUser(req.body)
-    }catch(e){
-        result = false
-    }
-    if(result){
+        await dbops.alterUser(req.body)
         res.sendStatus(204)
-    }else{
-        res.status(500).send("Server error")
+    }catch(e){
+        res.sendStatus(500)
     }
 })
 
@@ -75,19 +76,17 @@ app.post("/api/course", async (req, res) => {
     courseID = req.body.courseid;
     courseName = req.body.name;
     courseDesc = req.body.description;
-    if((courseID != null && courseName != null) && courseDesc != null){
-        try{
-            result = await dbops.createCourse(courseID, courseName, courseDesc)
-        }catch(e){
-            result = false
-        }
-        if(result){
-            res.sendStatus(204)
+    try{
+        result = await dbops.createCourse(courseID, courseName, courseDesc)
+        res.sendStatus(204)
+    }catch(e){
+        if(e == 1){
+            res.status(400).send("Course already exists")
+        }else if(e == 2){
+            res.status(400).send("Exceeded maximum size or incomplete input")
         }else{
-            res.status(500).send("Server error")
+            res.sendStatus(500)
         }
-    }else{
-        res.status(400).send("Wrong input error")
     }
 })
 app.get("/api/course/:id", async (req, res) => {
@@ -99,22 +98,12 @@ app.get("/api/course/:id", async (req, res) => {
     }
 })
 app.delete("/api/course", async (req, res) => {
-    /*try{
-        result = await dbops.deleteCourse(req.body.courseid)
-    }catch(e){
-        result = false
-    }
-    if(result){
-        res.sendStatus(204)
-    }else{
-        res.status(500).send("Server error")
-    }*/
     dbops.deleteCourse(req.body.courseid)
     .then((result) => {
         res.sendStatus(204)
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     })
 })
 app.put("/api/course", async (req, res) => {
@@ -123,7 +112,7 @@ app.put("/api/course", async (req, res) => {
         res.sendStatus(204)
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     })
 })
 
@@ -136,19 +125,25 @@ app.post("/api/group", async (req, res) => {
         res.sendStatus(204)
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        if(err == 1){
+            res.status(400).send("Group already exists")
+        }else if(err == 2){
+            res.status(400).send("Exceeded maximum size or incomplete input")
+        }else{
+            res.sendStatus(500)
+        }
     })
 })
 app.get("/api/group/:id", async (req, res) => {
     try{
         result = await dbops.getGroup(req.params.id)
-        if(result != null){
+        if(result){
             res.status(200).send(result)
         }else{
             res.status(404).send("Not found")
         }
     }catch(e){
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     }
 })
 app.delete("/api/group", async (req, res) => {
@@ -157,7 +152,7 @@ app.delete("/api/group", async (req, res) => {
         res.sendStatus(204)
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     })
 })
 app.put("/api/group", async (req, res) => {
@@ -166,7 +161,7 @@ app.put("/api/group", async (req, res) => {
         res.sendStatus(204)
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     })
 })
 
@@ -175,17 +170,19 @@ app.post("/api/subject", (req, res) => {
     subjectid = req.body.subjectid
     subjectdesc = req.body.description
     subjectname = req.body.name
-    if((subjectid && subjectdesc) && subjectname){
         dbops.createSubject(subjectid, subjectname, subjectdesc)
         .then((result) => {
             res.sendStatus(204)
         })
         .catch((err) => {
-            res.status(500).send("Server error")
+            if(err == 1){
+                res.status(400).send("Group already exists")
+            }else if(err == 2){
+                res.status(400).send("Exceeded maximum size or incomplete input")
+            }else{
+                res.sendStatus(500)
+            }
         })
-    }else{
-        res.status(400).send("Wrong input error")
-    }
 })
 app.get("/api/subject/:id", (req, res) => {
     dbops.getSubject(req.params.id)
@@ -197,7 +194,7 @@ app.get("/api/subject/:id", (req, res) => {
         }
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     })
 })
 app.delete("/api/subject", (req, res) => {
@@ -206,7 +203,7 @@ app.delete("/api/subject", (req, res) => {
         res.sendStatus(204)
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     })
 })
 app.put("/api/subject", (req, res) => {
@@ -215,6 +212,8 @@ app.put("/api/subject", (req, res) => {
         res.sendStatus(204)
     })
     .catch((err) => {
-        res.status(500).send("Server error")
+        res.sendStatus(500)
     })
 })
+
+//          I NEED TO REFINE THE CODE ABOVE AND SET STANDARDS PRIOR TO COMMENCING
