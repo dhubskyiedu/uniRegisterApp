@@ -7,53 +7,95 @@ const db = new sqlite.Database("./data.db", sqlite.OPEN_READWRITE, (err) => {
     }
 })
 
-// USERS
-async function createUser(uname, passwd, email, fname, lname, alevel){
+// info is a 2d array: 
+/* 
+[
+    [tableName1, [param1, val1, max size], [param2, val2, max size], ...],
+    [tableName2, [param1, val1, max size], [param2, val2, max size], ...],
+    ...
+]
+*/
+async function createOne(info){ // params is a 2d array: [[param1, val1, max size], [param2, val2, max size], ...]
     return new Promise((resolve, reject) => {
         // data verification
-        valid = uname && passwd // data is not null
-        valid &&= email && alevel
-        valid &&= fname && lname
-        valid &&= uname.length <= 255 && passwd.length <= 255
-        valid &&= email.length <= 255 && alevel.length <= 255
-        valid &&= fname.length <= 255 && lname.length <= 255
-        if(valid){
-            // db operation
-            db.run(`INSERT INTO Users(username, email, fName, lName, accessL) VALUES (?, ?, ?, ?, ?);`,
-            [uname, email, fname, lname, alevel], (err) => {
-                if(err){
-                    if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
-                        reject(1) // error code 1 - user exists
+        isNull = null // stores defect param
+        sizeAbnormal = null // stores defect param
+        normalSize = null
+        for(i of info){
+            for(j in i){
+                if(j>=1){
+                    if(!i[j][1]){
+                        isNull = i[j][0]
+                        break
                     }else{
-                        reject()
-                    }
-                }else{
-                    db.run(`INSERT INTO Auth VALUES (?, ?);`,
-                        [uname, passwd], (err) => {
-                            if(err){
-                                if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
-                                    reject(1) // error code 1 - user exists
-                                }else{
-                                    reject()
-                                }
-                            }else{
-                                resolve()
-                            }
+                        if(i[j][1].length > i[j][2]){
+                            sizeAbnormal = i[j][0]
+                            normalSize = i[j][2]
+                            break
                         }
-                    )
+                    }
                 }
             }
-            )
-        }else{
-            reject(2) // error code 2 - too lengthy inputs
         }
-    })
+
+        // FIXING 1
+
+        if(!isNull && !sizeAbnormal){
+
+            // FIXING 2
+
+            for(i in info){
+                tableName = info[i][0]
+                // params EQUALS TO info[i][1:]
+                paramStr = `(`
+                valueStr = `(`
+                values = []
+                /*for(i of params){
+                    paramStr += i[0]+`, `
+                    valueStr += `?, `
+                    values.push(i[1])
+                }*/
+                for(j in info[i]){
+                    if(j >= 1){
+                        paramStr += info[i][j][0]+`, `
+                        valueStr += `?, `
+                        values.push(info[i][j][1])
+                    }
+                }
+                paramStr = paramStr.slice(0, paramStr.length-2)
+                paramStr += `)`
+                valueStr = valueStr.slice(0, valueStr.length-2)
+                valueStr += `)`
+                sql = `INSERT INTO `+tableName+` `+paramStr+` VALUES `+valueStr+`;`
+                db.run(sql,
+                    values, (err) => {
+                        if(err){
+                            if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
+                                reject([3]) // error code 3
+                            }else if(err.message.split(":")[0] == "SQLITE_BUSY"){
+                                reject([4])
+                            }else{
+                                reject(err)
+                            }
+                        }else{
+                            resolve()
+                        }
+                })
+            }
+
+            
+        }else if(isNull){
+            reject([1, isNull]) // error code 1: Required data is absent
+        }else{
+            reject([2, sizeAbnormal, normalSize]) // error code 2: Exceeding maximum size
+        }
+        })
 }
 
-async function getUser(uname){
+async function getOne(tableName, idName, id){
     return new Promise((resolve, reject) => {
-        db.get(`SELECT * FROM Users WHERE username = ?;`,
-            [uname], (err, rows) => {
+        db.get(`SELECT * FROM `+tableName+` WHERE `+idName+` = ?;`,
+            [id], (err, rows) => {
                 if(err){
                     reject()
                 }else{
@@ -64,35 +106,6 @@ async function getUser(uname){
     })
 }
 
-// All existing users
-// Fields selected by query, e.g.: ?info=username,fName,email
-async function getUsers(info){
-    return new Promise((resolve, reject) => {
-        db.all(`SELECT * FROM Users;`,
-            [], (err, rows) => {
-                if(err){
-                    reject()
-                }else{
-                    if(info != null){
-                        result = []
-                        infoArr = info.split(",")
-                        for(i of rows){
-                            obj = new Object()
-                            for(j of infoArr){
-                                obj[j] = i[j]
-                            }
-                            result.push(obj)
-                        }
-                        resolve(result)
-                    }else{
-                        resolve(rows)
-                    }
-                    
-                }
-            }
-        )
-    })
-}
 async function deleteUser(uname){
     return new Promise((resolve, reject) => {
         db.run(`DELETE FROM Users WHERE username = ?;`,
@@ -149,45 +162,6 @@ async function alterUser(info){
 }
 
 // COURSES
-async function createCourse(id, name, desc){
-    return new Promise((resolve, reject) => {
-        valid = id && name
-        valid &&= desc
-        valid &&= id.length <= 255 && name.length <= 255
-        valid &&= desc.length <= 255
-        if(valid){
-            db.run(`INSERT INTO Courses VALUES (?, ?, ?);`,
-            [id, name, desc], (err) => {
-                if(err){
-                    if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
-                        reject(1) // error code 1 - course exists
-                    }else{
-                        reject()
-                    }
-                }else{
-                    resolve()
-                }
-            }
-            )
-        }else{
-            reject(2) // error code 2 - invalid input
-        }
-    })
-}
-
-async function getCourse(id){
-    return new Promise((resolve, reject) => {
-        db.get(`SELECT * FROM Courses WHERE courseID = ?;`,
-            [id], (err, rows) => {
-                if(err){
-                    reject()
-                }else{
-                    resolve(rows)
-                }
-            }
-        )
-    })
-}
 
 async function getCourses(info){
     return new Promise((resolve, reject) => {
@@ -255,74 +229,7 @@ async function alterCourse(info){
 }
 
 // GROUPS
-async function createGroup(groupID, courseID){
-    return new Promise((resolve, reject) => {
-        valid = groupID && courseID
-        valid &&= groupID.length <= 255 && courseID.length <= 255
-        if(!valid){
-            reject(2) // error code 2 - invalid input
-        }else{
-            db.run(`INSERT INTO Groups VALUES (?, ?);`,
-            [groupID, courseID], (err) => {
-                if(err){
-                    if(err.message.split(":")[0] == "SQLITE_CONSTRAINT"){
-                        reject(1) // error code 1 - group exists
-                    }else{
-                        reject()
-                    }
-                }else{
-                    resolve()
-                }
-            }
-            )
-        }
-    })
-}
-async function getGroup(id){
-    return new Promise((resolve, reject) => {
-        if(id == null){
-            reject()
-        }else{
-            db.get(`SELECT * FROM Groups WHERE groupID = ?;`,
-                [id], (err, rows) => {
-                    if(err){
-                        reject()
-                    }else{
-                        resolve(rows)
-                    }
-                }
-            )
-        }
-    })
-}
 
-async function getGroups(info){
-    return new Promise((resolve, reject) => {
-        db.all(`SELECT * FROM Groups;`,
-            [], (err, rows) => {
-                if(err){
-                    reject()
-                }else{
-                    if(info != null){
-                        result = []
-                        infoArr = info.split(",")
-                        for(i of rows){
-                            obj = new Object()
-                            for(j of infoArr){
-                                obj[j] = i[j]
-                            }
-                            result.push(obj)
-                        }
-                        resolve(result)
-                    }else{
-                        resolve(rows)
-                    }
-                    
-                }
-            }
-        )
-    })
-}
 
 async function deleteGroup(id){
     return new Promise((resolve, reject) => {
@@ -365,41 +272,16 @@ async function alterGroup(info){
 }
 
 // SUBJECTS
-async function createSubject(id, name, desc){
-    return new Promise((resolve, reject) => {
-        db.run(`INSERT INTO Subjects VALUES (?, ?, ?);`,
-            [id, name, desc], (err) => {
-                if(err){
-                    reject()
-                }else{
-                    resolve()
-                }
-            }
-        )
-    })
-}
-async function getSubject(id){
-    return new Promise((resolve, reject) => {
-        db.get(`SELECT * FROM Subjects WHERE subjectID = ?;`,
-            [id], (err, rows) => {
-                if(err){
-                    reject()
-                }else{
-                    resolve(rows)
-                }
-            }
-        )
-    })
-}
 
-async function getSubjects(info){
+
+async function getAll(tableName, info){
     return new Promise((resolve, reject) => {
-        db.all(`SELECT * FROM Subjects;`,
+        db.all(`SELECT * FROM `+tableName+`;`,
             [], (err, rows) => {
                 if(err){
                     reject()
                 }else{
-                    if(info != null){
+                    if(info){
                         result = []
                         infoArr = info.split(",")
                         for(i of rows){
@@ -419,6 +301,7 @@ async function getSubjects(info){
         )
     })
 }
+
 
 async function deleteSubject(id){
     return new Promise((resolve, reject) => {
@@ -457,24 +340,15 @@ async function alterSubject(info){
 }
 
 module.exports = {
-    createUser,
-    getUser,
-    getUsers,
     deleteUser,
     alterUser,
-    createCourse,
-    getCourse,
-    getCourses,
     deleteCourse,
     alterCourse,
-    createGroup,
-    getGroup,
-    getGroups,
     deleteGroup,
     alterGroup,
-    createSubject,
-    getSubject,
-    getSubjects,
     deleteSubject,
-    alterSubject
+    alterSubject,
+    getAll,
+    getOne,
+    createOne
 }
