@@ -78,7 +78,9 @@ app.get("/api/users", async (req, res) => {
 })
 app.delete("/api/user", async (req, res) => {
     try{
-        await dbops.deleteUser(req.body.uname)
+        //await dbops.deleteUser(req.body.uname)
+        await dbops.deleteOne("Users", "username", req.body.username)
+        await dbops.deleteOne("Auth", "username", req.body.username)
         res.sendStatus(204)
     }catch(e){
         res.sendStatus(500)
@@ -86,9 +88,21 @@ app.delete("/api/user", async (req, res) => {
 })
 app.put("/api/user", async (req, res) => {
     try{
-        await dbops.alterUser(req.body)
+        //await dbops.alterUser(req.body)
+        await dbops.alterOne("Users", "username", [
+            ["username", req.body.username],
+            ["accessL", req.body.accessL],
+            ["email", req.body.email],
+            ["fName", req.body.fName],
+            ["lName", req.body.lName]
+        ])
+        await dbops.alterOne("Auth", "username", [
+            ["username", req.body.username],
+            ["password", req.body.password]
+        ])
         res.sendStatus(204)
     }catch(e){
+        console.log(e)
         res.sendStatus(500)
     }
 })
@@ -136,7 +150,8 @@ app.get("/api/courses", async (req, res) => {
     })
 })
 app.delete("/api/course", async (req, res) => {
-    dbops.deleteCourse(req.body.courseID)
+    //dbops.deleteCourse(req.body.courseID)
+    dbops.deleteOne("Courses", "courseID", req.body.courseID)
     .then((result) => {
         res.sendStatus(204)
     })
@@ -145,7 +160,12 @@ app.delete("/api/course", async (req, res) => {
     })
 })
 app.put("/api/course", async (req, res) => {
-    dbops.alterCourse(req.body)
+    //dbops.alterCourse(req.body)
+    dbops.alterOne("Courses", "courseID", [
+        ["courseID", req.body.courseID],
+        ["name", req.body.name],
+        ["description", req.body.description]
+    ])
     .then((result) => {
         res.sendStatus(204)
     })
@@ -200,7 +220,8 @@ app.get("/api/groups", async (req, res) => {
     })
 })
 app.delete("/api/group", async (req, res) => {
-    dbops.deleteGroup(req.body.groupID)
+    //dbops.deleteGroup(req.body.groupID)
+    dbops.deleteOne("Groups", "groupID", req.body.groupID)
     .then((result) => {
         res.sendStatus(204)
     })
@@ -209,7 +230,11 @@ app.delete("/api/group", async (req, res) => {
     })
 })
 app.put("/api/group", async (req, res) => {
-    dbops.alterGroup(req.body)
+    //dbops.alterGroup(req.body)
+    dbops.alterOne("Groups", "groupID", [
+        ["groupID", req.body.groupID],
+        ["courseID", req.body.courseID]
+    ])
     .then((result) => {
         res.sendStatus(204)
     })
@@ -266,7 +291,8 @@ app.get("/api/subjects", async (req, res) => {
     })
 })
 app.delete("/api/subject", (req, res) => {
-    dbops.deleteSubject(req.body.subjectID)
+    //dbops.deleteSubject(req.body.subjectID)
+    dbops.deleteOne("Subjects", "subjectID", req.body.subjectID)
     .then((result) => {
         res.sendStatus(204)
     })
@@ -275,7 +301,12 @@ app.delete("/api/subject", (req, res) => {
     })
 })
 app.put("/api/subject", (req, res) => {
-    dbops.alterSubject(req.body)
+    //dbops.alterSubject(req.body)
+    dbops.alterOne("Subjects", "subjectID", [
+        ["subjectID", req.body.subjectID],
+        ["name", req.body.name],
+        ["description", req.body.description]
+    ])
     .then((result) => {
         res.sendStatus(204)
     })
