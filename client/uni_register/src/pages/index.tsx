@@ -7,10 +7,10 @@ export default function Home() {
           <h1 className="text-6xl">Welcome to UniRegister</h1>
         </div>
         <div className="flex flex-col items-center justify-center p-10">
-        <Link href="/login" className="bg-sky-500 text-white p-5 m-5 w-70 rounded-xl hover:bg-pink-500">
+        <Link href="/signin" className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
           Sign in
         </Link>
-        <Link href="/signin" className="bg-sky-500 text-white p-5 m-5 w-70 rounded-xl hover:bg-pink-500" >
+        <Link href="/signup" className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500" >
           Sign up
         </Link>
         </div>
