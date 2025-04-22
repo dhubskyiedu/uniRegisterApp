@@ -1,41 +1,152 @@
 import Link from "next/link";
+import { useState } from "react";
+import { validatePassword, validateEmail } from "../functions/auth";
 export default function Home() {
-  return (
-    <div className="text-2xl text-black flex flex-col justify-center items-center p-10">
-        <h1 className="text-8xl text-sky-500 text-center">Sign up</h1>
-        <form className="mt-10">
-            <label>
-                Email<br/>
-                <input type="text"/>
-            </label><br/>
-            <label>
-                Phone<br/>
-                <input type="text"/>
-            </label><br/>
-            <label>
-                First name<br/>
-                <input type="text"/>
-            </label><br/>
-            <label>
-                Last name<br/>
-                <input type="text"/>
-            </label><br/>
-            <label>
-                Username<br/>
-                <input type="text"/>
-            </label><br/>
-            <label>
-                Password<br/>
-                <input type="password"/>
-            </label><br/>
-            <label>
-                Sign up as a student?<br/>
-                Yes <input type="checkbox"/>
-            </label><br/>
-            <input data-testid="button" type="submit" value="Sign up" className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500"/>
-            <br/>
-        </form>
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [role, setRole] = useState("student");
 
-    </div>
-  );
+    const [emptyFields, setEmptyFields] = useState<string[]>([]);
+
+    const renewEmail = (event: any) => {
+        setEmail(event.target.value);
+    }
+    const renewPhone = (event: any) => {
+        setPhone(event.target.value);
+    }
+    const renewFirstName = (event: any) => {
+        setFirstName(event.target.value);
+    }
+    const renewLastName = (event: any) => {
+        setLastName(event.target.value);
+    }
+    const renewUsername = (event: any) => {
+        setUsername(event.target.value);
+    }
+    const renewPassword = (event: any) => {
+        setPassword(event.target.value);
+    }
+    const renewRole = (event: any) => {
+        setRole(event.target.value);
+    }
+
+    const checkEmptyFields = (): boolean => {
+        let res: string[] = [];
+        if(!email){
+            res.push("email");
+        }
+        if(!phone){
+            res.push("phone");
+        }
+        if(!firstName){
+            res.push("firstName");
+        }
+        if(!lastName){
+            res.push("lastName");
+        }
+        if(!username){
+            res.push("username");
+        }
+        if(!password){
+            res.push("password");
+        }
+        if(!role){
+            res.push("role");
+        }
+        let passwordOk: boolean = false;
+        let emailOk: boolean = false;
+        if(password){
+            switch(validatePassword(password)){
+                case 0:
+                    passwordOk = true;
+                break;
+                case 1:
+                    res.push("password");
+                    res.push("passVal1");
+                break;
+                case 2:
+                    res.push("password");
+                    res.push("passVal2");
+                break;
+                case 3:
+                    res.push("password");
+                    res.push("passVal3");
+                break;
+            }
+        }
+        if(email){
+            switch(validateEmail(email)){
+                case 0:
+                    emailOk = true;
+                break;
+                case 1:
+                    res.push("email");
+                    res.push("emVal1");
+                break;
+                case 2:
+                    res.push("email");
+                    res.push("emVal2");
+                break;
+            }
+        }
+        setEmptyFields(res);
+        return res.length == 0 && passwordOk && emailOk;
+    }
+    const signUp = () => {
+        
+    }
+    return (
+        <div className="text-2xl text-black flex flex-col justify-center items-center p-10">
+            <h1 className="text-8xl text-sky-500 text-center">Sign up</h1>
+            <form className="mt-10">
+                <label>
+                    {emptyFields.includes("email") ? <span className="text-red-500">Email</span> : <span>Email</span>}
+                    {emptyFields.includes("emVal1") ? <span className="text-red-500"><br/><hr/>Type the email</span>:<></>}
+                    {emptyFields.includes("emVal2") ? <span className="text-red-500"><br/><hr/>It is not an email</span>:<></>}
+                    <br/>
+                    <input type="text" className="border-2 border-dashed" onChange={renewEmail}/>
+                </label><br/>
+                <label>
+                    {emptyFields.includes("phone") ? <span className="text-red-500">Phone</span> : <span>Phone</span>}<br/>
+                    <input type="text" className="border-2 border-dashed" onChange={renewPhone}/>
+                </label><br/>
+                <label>
+                    {emptyFields.includes("firstName") ? <span className="text-red-500">First name</span> : <span>First name</span>}<br/>
+                    <input type="text" className="border-2 border-dashed" onChange={renewFirstName}/>
+                </label><br/>
+                <label>
+                    {emptyFields.includes("lastName") ? <span className="text-red-500">Last name</span> : <span>Last name</span>}<br/>
+                    <input type="text" className="border-2 border-dashed" onChange={renewLastName}/>
+                </label><br/>
+                <label>
+                    {emptyFields.includes("username") ? <span className="text-red-500">Username</span> : <span>Username</span>}<br/>
+                    <input type="text" className="border-2 border-dashed" onChange={renewUsername}/>
+                </label><br/>
+                <label>
+                    {emptyFields.includes("password") ? <span className="text-red-500">Password</span> : <span>Password </span>}
+                    {emptyFields.includes("passVal1") ? <span className="text-red-500"><br/><hr/>Type the password</span>:<></>}
+                    {emptyFields.includes("passVal2") ? <span className="text-red-500"><br/><hr/>Must be more than<br/>12 characters</span>:<></>}
+                    {emptyFields.includes("passVal3") ? <span className="text-red-500"><br/><hr/>Must include<br/><em>small letters</em> AND<br/><em>capital letters</em> AND<br/><em>numbers</em></span>:<></>}
+                    <br/>
+                    <input type="password" className="border-2 border-dashed" onChange={renewPassword}/>
+                </label><br/>
+                <label>
+                    {emptyFields.includes("role") ? <span className="text-red-500">Sign up as: </span> : <span>Sign up as: </span>}<br/>
+                    <select id="role" name="role" onChange={renewRole}>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </label><br/>
+                <br/>
+            </form>
+            <button onClick={() => checkEmptyFields()} className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
+                Sign up
+            </button>
+        </div>
+    );
 }
