@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { useState } from "react";
-import { validatePassword, validateEmail } from "../functions/auth";
+import { validatePassword, validateEmail, validateUsername, createUser } from "../functions/auth";
+import { User } from "../interfaces/businessLogic";
 export default function Home() {
     const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [username, setUsername] = useState("");
@@ -14,9 +14,6 @@ export default function Home() {
 
     const renewEmail = (event: any) => {
         setEmail(event.target.value);
-    }
-    const renewPhone = (event: any) => {
-        setPhone(event.target.value);
     }
     const renewFirstName = (event: any) => {
         setFirstName(event.target.value);
@@ -34,13 +31,10 @@ export default function Home() {
         setRole(event.target.value);
     }
 
-    const checkEmptyFields = (): boolean => {
+    const checkEmptyFields = async (): Promise<boolean> => {
         let res: string[] = [];
         if(!email){
             res.push("email");
-        }
-        if(!phone){
-            res.push("phone");
         }
         if(!firstName){
             res.push("firstName");
@@ -59,6 +53,7 @@ export default function Home() {
         }
         let passwordOk: boolean = false;
         let emailOk: boolean = false;
+        let usernameOk: number = 2;
         if(password){
             switch(validatePassword(password)){
                 case 0:
@@ -93,11 +88,36 @@ export default function Home() {
                 break;
             }
         }
+        if(username){
+            usernameOk = await validateUsername(username);
+            if(usernameOk == 1){
+                res.push("unameVal1");
+            }
+            if(usernameOk == 2){
+                res.push("unameVal2");
+            }
+        }
         setEmptyFields(res);
-        return res.length == 0 && passwordOk && emailOk;
+        return res.length == 0 && passwordOk && emailOk && usernameOk == 0;
     }
-    const signUp = () => {
-        
+    const signUp = async () => {
+        let successEntries: boolean = await checkEmptyFields();
+        if(successEntries){
+            let user: User = {
+                username: username,
+                password: password,
+                firstName: firstName,
+                lastName: lastName,
+                role: role,
+                email: email
+            }
+            let successRegister = await createUser(user);
+            if(successRegister == 0){
+                alert("Success");
+            }else{
+                alert(successRegister);
+            }
+        }
     }
     return (
         <div className="text-2xl text-black flex flex-col justify-center items-center p-10">
@@ -111,10 +131,6 @@ export default function Home() {
                     <input type="text" className="border-2 border-dashed" onChange={renewEmail}/>
                 </label><br/>
                 <label>
-                    {emptyFields.includes("phone") ? <span className="text-red-500">Phone</span> : <span>Phone</span>}<br/>
-                    <input type="text" className="border-2 border-dashed" onChange={renewPhone}/>
-                </label><br/>
-                <label>
                     {emptyFields.includes("firstName") ? <span className="text-red-500">First name</span> : <span>First name</span>}<br/>
                     <input type="text" className="border-2 border-dashed" onChange={renewFirstName}/>
                 </label><br/>
@@ -123,7 +139,10 @@ export default function Home() {
                     <input type="text" className="border-2 border-dashed" onChange={renewLastName}/>
                 </label><br/>
                 <label>
-                    {emptyFields.includes("username") ? <span className="text-red-500">Username</span> : <span>Username</span>}<br/>
+                    {emptyFields.includes("username") ? <span className="text-red-500">Username</span> : <span>Username</span>}
+                    {emptyFields.includes("unameVal1") ? <span className="text-red-500"><br/><hr/>Username exists</span>:<></>}
+                    {emptyFields.includes("unameVal2") ? <span className="text-red-500"><br/><hr/>Server error</span>:<></>}
+                    <br/>
                     <input type="text" className="border-2 border-dashed" onChange={renewUsername}/>
                 </label><br/>
                 <label>
@@ -144,7 +163,7 @@ export default function Home() {
                 </label><br/>
                 <br/>
             </form>
-            <button onClick={() => checkEmptyFields()} className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
+            <button onClick={() => signUp()} className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
                 Sign up
             </button>
         </div>
