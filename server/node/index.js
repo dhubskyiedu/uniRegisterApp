@@ -4,8 +4,8 @@ const dbops = require("./dbops")
 const app = express()
 const parser = require("body-parser")
 
-const PORT = 3000;
-const frontend = '*';//"http://localhost:3001";
+const PORT = 3001;
+const frontend = '*';//"http://localhost:3000";
 
 app.use(cors())
 app.use(parser.json())
@@ -99,7 +99,6 @@ app.delete("/api/user", async (req, res) => {
 app.put("/api/user", async (req, res) => {
     res.set("Access-Control-Allow-Origin", frontend);
     try{
-        //await dbops.alterUser(req.body)
         await dbops.alterOne("Users", "username", [
             ["username", req.body.username],
             ["accessL", req.body.accessL],
@@ -115,6 +114,24 @@ app.put("/api/user", async (req, res) => {
     }catch(e){
         console.log(e)
         res.sendStatus(500)
+    }
+})
+app.post("/api/user/verify", async(req, res) => {
+    res.set("Access-Control-Allow-Origin", frontend);
+    try{
+        user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
+        if(user){
+            if(req.body.passwd == user.password){
+                res.status(200).send(true);
+            }else{
+                res.status(200).send(false);
+            }
+        }else{
+            res.status(404).send("Not found");
+        }
+    }catch(e){
+        console.log(e)
+        res.sendStatus(500);
     }
 })
 

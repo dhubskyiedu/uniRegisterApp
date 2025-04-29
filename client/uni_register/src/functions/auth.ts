@@ -1,4 +1,7 @@
-import { User, UserInfo } from "../interfaces/businessLogic";
+import { User, UserInfo, UserCreds } from "../interfaces/businessLogic";
+
+const SERVERPORT = 3001;
+
 // Password validation
 /*
     Outcome codes:
@@ -41,7 +44,7 @@ export function validateEmail(email: string): number{
 */
 export async function validateUsername(username: string): Promise<number>{
     try{
-        let url = "http://localhost:3000/api/user/"+username;
+        let url = "http://localhost:"+SERVERPORT+"/api/user/"+username;
         const response = await fetch(url, {
             method: "GET",
         });
@@ -63,7 +66,6 @@ export async function validateUsername(username: string): Promise<number>{
     0 - success
     1 - failure
 */
-
 export async function createUser(user: User){
     let alevel: string = "";
     switch(user.role){
@@ -77,12 +79,11 @@ export async function createUser(user: User){
             alevel = "2";
         break;
     }
-    
     if(alevel != "0" && alevel != "1" && alevel != "2"){
         return 1;
     }
     try{
-        const response = await fetch("http://localhost:3000/api/user", {
+        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -106,5 +107,60 @@ export async function createUser(user: User){
     }catch(error){
         alert(error)
         return 1;
+    }
+}
+
+// User authentication
+export async function userAuth(user: UserCreds): Promise<UserInfo | undefined>{
+    try{
+        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                uname: user.username,
+                passwd: user.password,
+            })
+        })
+        let result = await response.text();
+        if(result != "true"){
+            return undefined;
+        }
+        try{
+            const response2 = await fetch("http://localhost:"+SERVERPORT+"/api/user/"+user.username, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            let result2 = await response2.text();
+            let rawData = JSON.parse(result2);
+            let role: string = "NA";
+            switch(rawData.accessL){
+                case 0:
+                    role = "student";
+                break;
+                case 1:
+                    role = "teacher";
+                break;
+                case 2:
+                    role = "admin";
+                break;
+            }
+            let foundUser: UserInfo = {
+                username: rawData.username,
+                email: rawData.email,
+                firstName: rawData.fName,
+                lastName: rawData.lName,
+                role: role,
+                groupID: rawData.groupID ? rawData.groupID : undefined
+            }
+            return foundUser;
+        }catch(error2){
+            return undefined;
+        }
+    }catch(error){
+        return undefined;
     }
 }

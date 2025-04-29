@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { useState } from "react";
 import { validatePassword, validateEmail, validateUsername, createUser } from "../functions/auth";
 import { User } from "../interfaces/businessLogic";

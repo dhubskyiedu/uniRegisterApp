@@ -9,3 +9,7 @@ export interface UserInfo{
 export interface User extends UserInfo{
     password: string
 }
+export interface UserCreds{
+    username: string,
+    password: string
+}
