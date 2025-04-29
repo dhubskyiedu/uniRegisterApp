@@ -1,3 +1,4 @@
+// Authentication server
 const express = require("express")
 const cors = require('cors')
 const dbops = require("./dbops")
@@ -6,7 +7,7 @@ const parser = require("body-parser")
 const jwt = require("jsonwebtoken")
 require("dotenv").config();
 
-const PORT = 3001;
+const PORT = 3010;
 const frontend = '*';//"http://localhost:3000";
 
 app.use(cors())
@@ -21,7 +22,7 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(PORT, () => {
-    console.log("Server is listening on port 3000")
+    console.log("Server is listening on port "+PORT)
 })
 
 function authToken(res, req, next){

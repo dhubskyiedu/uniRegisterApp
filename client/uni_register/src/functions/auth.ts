@@ -10,7 +10,7 @@ const SERVERPORT = 3001;
     3 - low complexity (small, capital letters, numbers required)
 */
 export function validatePassword(password: string): number{
-    if(password.length < 12){
+    if(password.length < 8){
         return 2;
     }
     const regExSmall = /[a-z]/
@@ -124,9 +124,10 @@ export async function userAuth(user: UserCreds): Promise<UserInfo | undefined>{
             })
         })
         let result = await response.text();
-        if(result != "true"){
+        if(result == "false" || !result){
             return undefined;
         }
+        alert(result)
         try{
             const response2 = await fetch("http://localhost:"+SERVERPORT+"/api/user/"+user.username, {
                 method: "GET",

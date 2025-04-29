@@ -147,7 +147,7 @@ export default function Home() {
                 <label>
                     {emptyFields.includes("password") ? <span className="text-red-500">Password</span> : <span>Password </span>}
                     {emptyFields.includes("passVal1") ? <span className="text-red-500"><br/><hr/>Type the password</span>:<></>}
-                    {emptyFields.includes("passVal2") ? <span className="text-red-500"><br/><hr/>Must be more than<br/>12 characters</span>:<></>}
+                    {emptyFields.includes("passVal2") ? <span className="text-red-500"><br/><hr/>Must be more than<br/>8 characters</span>:<></>}
                     {emptyFields.includes("passVal3") ? <span className="text-red-500"><br/><hr/>Must include<br/><em>small letters</em> AND<br/><em>capital letters</em> AND<br/><em>numbers</em></span>:<></>}
                     <br/>
                     <input type="password" className="border-2 border-dashed" onChange={renewPassword}/>
