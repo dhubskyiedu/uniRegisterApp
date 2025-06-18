@@ -111,7 +111,7 @@ export async function createUser(user: User){
 }
 
 // User authentication
-export async function userAuth(user: UserCreds): Promise<UserInfo | undefined>{
+export async function userAuth(user: UserCreds): Promise<UserInfo | number>{
     try{
         const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/verify", {
             method: "POST",
@@ -124,8 +124,14 @@ export async function userAuth(user: UserCreds): Promise<UserInfo | undefined>{
             })
         })
         let result = await response.text();
-        if(result == "false" || !result){
-            return undefined;
+        if(result == "false"){
+            return 1; // wrong password
+        }
+        if(response.status == 404){
+            return 2; // username does not exist
+        }
+        if(!result || response.status == 500){
+            return 3; // server error
         }
         alert(result)
         try{
@@ -159,9 +165,9 @@ export async function userAuth(user: UserCreds): Promise<UserInfo | undefined>{
             }
             return foundUser;
         }catch(error2){
-            return undefined;
+            return 3; // technical error
         }
     }catch(error){
-        return undefined;
+        return 3; // technical error
     }
 }

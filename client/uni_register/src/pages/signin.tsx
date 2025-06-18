@@ -4,7 +4,6 @@ import { UserInfo, UserCreds } from "../interfaces/businessLogic";
 export default function Home() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-
     const [emptyFields, setEmptyFields] = useState<string[]>([]);
     const renewUsername = (event: any) => {
         setUsername(event.target.value);
@@ -21,6 +20,7 @@ export default function Home() {
         if(!password){
             res.push("password");
         }
+        emptyFields.length = 0;
         setEmptyFields(res);
         return res.length == 0;
     }
@@ -31,8 +31,8 @@ export default function Home() {
                 username:username,
                 password: password
             }
-            let user: UserInfo | undefined = await userAuth(creds);
-            if(user){
+            let user: UserInfo | number = await userAuth(creds);
+            if(typeof(user) != "number"){
                 if(user.role == "student"){
                     location.replace("/student");
                 }else if(user.role == "teacher"){
@@ -42,7 +42,13 @@ export default function Home() {
                 }
             }else{
                 let res: string[] = [...emptyFields];
-                res.push("wrongCreds");
+                if(user == 1){
+                    res.push("wrongPasswd");
+                }else if(user == 2){
+                    res.push("wrongUname");
+                }else{
+                    res.push("serverErr");
+                }
                 setEmptyFields(res);
             }
         }
@@ -53,19 +59,16 @@ export default function Home() {
             <form className="mt-10">
                 <label>
                     {emptyFields.includes("username") ? <span className="text-red-500">Username</span> : <span>Username</span>}
-                    {emptyFields.includes("unameVal1") ? <span className="text-red-500"><br/><hr/>Username exists</span>:<></>}
-                    {emptyFields.includes("unameVal2") ? <span className="text-red-500"><br/><hr/>Server error</span>:<></>}
                     <br/>
                     <input type="text" className="border-2 border-dashed" onChange={renewUsername}/>
                 </label><br/>
                 <label>
                     {emptyFields.includes("password") ? <span className="text-red-500">Password</span> : <span>Password </span>}
-                    {emptyFields.includes("passVal1") ? <span className="text-red-500"><br/><hr/>Type the password</span>:<></>}
-                    {emptyFields.includes("passVal2") ? <span className="text-red-500"><br/><hr/>Must be more than<br/>12 characters</span>:<></>}
-                    {emptyFields.includes("passVal3") ? <span className="text-red-500"><br/><hr/>Must include<br/><em>small letters</em> AND<br/><em>capital letters</em> AND<br/><em>numbers</em></span>:<></>}
                     <br/>
                     <input type="password" className="border-2 border-dashed" onChange={renewPassword}/><br/>
-                    {emptyFields.includes("wrongCreds") ? <span className="text-red-500">Wrong credentials</span> : <></>}
+                    {emptyFields.includes("wrongPasswd") ? <span className="text-red-500">Wrong password</span> : <></>}
+                    {emptyFields.includes("wrongUname") ? <span className="text-red-500">User does not exist</span> : <></>}
+                    {emptyFields.includes("serverErr") ? <span className="text-red-500">Server error</span> : <></>}
                 </label><br/>
                 <br/>
             </form>
