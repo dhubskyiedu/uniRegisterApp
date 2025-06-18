@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import { User, UserInfo, UserCreds } from "../interfaces/businessLogic";
 
 const SERVERPORT = 3001;
@@ -47,6 +48,7 @@ export async function validateUsername(username: string): Promise<number>{
         let url = "http://localhost:"+SERVERPORT+"/api/user/"+username;
         const response = await fetch(url, {
             method: "GET",
+            credentials: "include"
         });
         if(response.status == 200){
             return 1;
@@ -111,10 +113,11 @@ export async function createUser(user: User){
 }
 
 // User authentication
-export async function userAuth(user: UserCreds): Promise<UserInfo | number>{
+export async function userAuth(user: UserCreds): Promise<number>{
     try{
         const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/verify", {
             method: "POST",
+            credentials: 'include',
             headers: {
                 "Content-Type": "application/json",
             },
@@ -123,51 +126,62 @@ export async function userAuth(user: UserCreds): Promise<UserInfo | number>{
                 passwd: user.password,
             })
         })
-        let result = await response.text();
-        if(result == "false"){
-            return 1; // wrong password
-        }
         if(response.status == 404){
             return 2; // username does not exist
         }
-        if(!result || response.status == 500){
+        if(response.status == 403){
+            return 1; // wrong password
+        }
+        if(response.status == 500){
             return 3; // server error
         }
-        alert(result)
-        try{
-            const response2 = await fetch("http://localhost:"+SERVERPORT+"/api/user/"+user.username, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            })
-            let result2 = await response2.text();
-            let rawData = JSON.parse(result2);
-            let role: string = "NA";
-            switch(rawData.accessL){
-                case 0:
-                    role = "student";
-                break;
-                case 1:
-                    role = "teacher";
-                break;
-                case 2:
-                    role = "admin";
-                break;
-            }
-            let foundUser: UserInfo = {
-                username: rawData.username,
-                email: rawData.email,
-                firstName: rawData.fName,
-                lastName: rawData.lName,
-                role: role,
-                groupID: rawData.groupID ? rawData.groupID : undefined
-            }
-            return foundUser;
-        }catch(error2){
-            return 3; // technical error
+        if(response.status == 200){
+            return 0;
         }
+        return 3; // other server error
     }catch(error){
+        return 3; // technical error
+    }
+
+}
+
+export async function getUserInfo(username: string): Promise<UserInfo | number>{
+    try{
+        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/"+username, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+        if(response.status == 404){
+            return 1; // no username found
+        }else if(response.status == 500){
+            return 3; // server error
+        }
+        let rawData = await response.json();
+        let role: string = "NA";
+        switch(rawData.accessL){
+            case 0:
+                role = "student";
+            break;
+            case 1:
+                role = "teacher";
+            break;
+            case 2:
+                role = "admin";
+            break;
+        }
+        let foundUser: UserInfo = {
+            username: rawData.username,
+            email: rawData.email,
+            firstName: rawData.fName,
+            lastName: rawData.lName,
+            role: role,
+            groupID: rawData.groupID ? rawData.groupID : undefined
+        }
+        return foundUser;
+    }catch(error2){
         return 3; // technical error
     }
 }

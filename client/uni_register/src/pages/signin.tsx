@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { validatePassword, validateEmail, validateUsername, createUser, userAuth } from "../functions/auth";
+import { validatePassword, validateEmail, validateUsername, createUser, userAuth, getUserInfo } from "../functions/auth";
 import { UserInfo, UserCreds } from "../interfaces/businessLogic";
-export default function Home() {
+export default function SignIn() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [emptyFields, setEmptyFields] = useState<string[]>([]);
@@ -31,20 +31,30 @@ export default function Home() {
                 username:username,
                 password: password
             }
-            let user: UserInfo | number = await userAuth(creds);
-            if(typeof(user) != "number"){
-                if(user.role == "student"){
-                    location.replace("/student");
-                }else if(user.role == "teacher"){
-                    location.replace("/teacher");
-                }else if(user.role == "admin"){
-                    location.replace("/admin");
+            let success: number = await userAuth(creds);
+            if(success === 0){
+                let user: UserInfo | number = await getUserInfo(creds.username);
+                alert(user)
+                if(typeof(user) != "number"){
+                    if(user.role == "student"){
+                        location.replace("/student/"+username);
+                    }else if(user.role == "teacher"){
+                        location.replace("/teacher/"+username);
+                    }else if(user.role == "admin"){
+                        location.replace("/admin/"+username);
+                    }
+                }else{
+                    
+                    let res: string[] = [...emptyFields];
+                    res.push("serverErr");
+                    setEmptyFields(res);
                 }
             }else{
+                //alert(success)
                 let res: string[] = [...emptyFields];
-                if(user == 1){
+                if(success === 1){
                     res.push("wrongPasswd");
-                }else if(user == 2){
+                }else if(success === 2){
                     res.push("wrongUname");
                 }else{
                     res.push("serverErr");

@@ -1,43 +1,35 @@
-const express = require("express")
-const cors = require('cors')
-const dbops = require("./dbops")
-const app = express()
-const parser = require("body-parser")
-const jwt = require("jsonwebtoken")
+const express = require("express");
+const cors = require('cors');
+const dbops = require("./dbops");
+const app = express();
+const parser = require("body-parser");
+const jwt = require("jsonwebtoken");
+const cookieParser = require('cookie-parser');
 require("dotenv").config();
 
 const PORT = 3001;
-const frontend = '*';//"http://localhost:3000";
+const frontend = 'http://localhost:3000';
+app.use(cookieParser());
+app.use(cors({
+    origin: frontend, // your React app's URL
+    credentials: true
+}))
 
-app.use(cors())
-app.use(parser.json())
-app.use(parser.urlencoded({extended: false}))
+app.use(parser.json());
+app.use(parser.urlencoded({extended: false}));
 app.use((err, req, res, next) => {
     if(err instanceof SyntaxError){
-        res.status(400).send("Invalid input")
+        res.status(400).send("Invalid input");
     }else{
-        next()
+        next();
     }
 })
 
 app.listen(PORT, () => {
-    console.log("Server is listening on port 3000")
+    console.log("Server is listening on port 3000");
 })
 
-function authToken(res, req, next){
-    const header = req.headers("authorization");
-    const token = header && header.split(" ")[1];
-    if(!token){
-        return res.sendStatus(401);
-    }
-    jwt.verify(token, process.env.ACCESS_SECRET, (error, user) => {
-        if(error){
-            return res.sendStatus(403);
-        }
-        
-        next();
-    });
-}
+
 
 // USERS
 app.post("/api/user", async (req, res) => {
@@ -79,14 +71,32 @@ app.post("/api/user", async (req, res) => {
         res.sendStatus(204)
     }
 })
-app.get("/api/user/:uname", async (req, res) => {
+
+function authToken(req, res, next){
+    const origin = req.headers.origin;
+    const token = req.cookies.jwtToken;
+    if(!token){
+        return res.sendStatus(401);
+    }
+    if(origin !== frontend){
+        return res.sendStatus(403);
+    }
+    jwt.verify(token, process.env.ACCESS_SECRET, (error, user) => {
+        if(error){
+            return res.sendStatus(403);
+        }
+        next();
+    });
+}
+
+app.get("/api/user/:uname", authToken, async (req, res) => {
     res.set("Access-Control-Allow-Origin", frontend);
     try{
         user = await dbops.getOne("Users", "username", req.params.uname)
         if(user){
-            res.status(200).send(user)
+            res.status(200).json(user);
         }else{
-            res.status(404).send("Not found")
+            res.status(404).json({"error": "not found"});
         }
     }catch(e){
         res.sendStatus(500)
@@ -133,6 +143,9 @@ app.put("/api/user", async (req, res) => {
         res.sendStatus(500)
     }
 })
+
+
+
 app.post("/api/user/verify", async(req, res) => {
     res.set("Access-Control-Allow-Origin", frontend);
     try{
@@ -140,12 +153,17 @@ app.post("/api/user/verify", async(req, res) => {
         if(user){
             if(req.body.passwd == user.password){
                 const token = jwt.sign(user.password, process.env.ACCESS_SECRET);
-                res.status(200).json({token: token});
+                res.cookie('jwtToken', token, {
+                    httpOnly: true,
+                    secure: false,
+                    sameSite: 'Strict',
+                    maxAge: 24 * 60 * 60 * 1000
+                }).sendStatus(200);
             }else{
-                res.status(200).send(false);
+                res.status(403).json({error: "wrong password"});
             }
         }else{
-            res.status(404).send("Not found");
+            res.status(404).json({error: "non-existent username"});
         }
     }catch(e){
         console.log(e)

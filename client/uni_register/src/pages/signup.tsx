@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { validatePassword, validateEmail, validateUsername, createUser } from "../functions/auth";
 import { User } from "../interfaces/businessLogic";
-export default function Home() {
+export default function SignUp() {
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
