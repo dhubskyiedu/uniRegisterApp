@@ -1,0 +1,11 @@
+node_modules
+*.log
+logs
+npm-debug.log*
+#.env
+Dockerfile
+.dockerignore
+.vscode
+.idea
+.DS_Store
+Thumbs.db

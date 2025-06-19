@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.DS_Store
+.git
+.next
+*.log
+*.md
+.vscode
+.idea
+*.tgz
+*.bak
+*.swp
+*.swo
+*.swn
+*.swo~
