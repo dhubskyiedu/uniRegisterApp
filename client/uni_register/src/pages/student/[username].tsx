@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { getUserInfo } from "../../functions/auth";
 import { UserInfo } from "../../interfaces/businessLogic";
+import Top from '@/components/reusable/top';
 
 export default function Student(){
   const router = useRouter();
@@ -30,11 +31,24 @@ export default function Student(){
         </div>
     );
   }else{
-    return(
-        <div>
+    /*<div>
         <h1>{userInfo ? userInfo.username : ""}</h1>
         <p>Email</p>
-        {/* Display other student fields here */}
+
+        </div>*/
+    return(
+        <div className="">
+          <Top 
+            header="UniRegister | Student" 
+            sections={
+              [
+                {name: "Home", func: () => alert("Home")},
+                {name: "Log out", func: () => alert("Log out")}
+              ]
+            }
+            logoutFunc={() => alert("To be implemented")}
+            accountFunc={() => alert("To be implemented")}
+          ></Top>
         </div>
     );
   }
