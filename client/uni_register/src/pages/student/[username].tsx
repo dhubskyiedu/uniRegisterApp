@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { getUserInfo } from "../../functions/auth";
 import { UserInfo } from "../../interfaces/businessLogic";
-import Top from '@/components/reusable/top';
+import StudentTop from '@/components/dedicated/studentTop';
+import TeacherTop from '@/components/dedicated/teacherTop';
 
 export default function Student(){
   const router = useRouter();
@@ -38,17 +39,8 @@ export default function Student(){
         </div>*/
     return(
         <div className="">
-          <Top 
-            header="UniRegister | Student" 
-            sections={
-              [
-                {name: "Home", func: () => alert("Home")},
-                {name: "Log out", func: () => alert("Log out")}
-              ]
-            }
-            logoutFunc={() => alert("To be implemented")}
-            accountFunc={() => alert("To be implemented")}
-          ></Top>
+          
+          <TeacherTop></TeacherTop>
         </div>
     );
   }

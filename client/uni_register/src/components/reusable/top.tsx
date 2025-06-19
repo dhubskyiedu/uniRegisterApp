@@ -3,14 +3,14 @@ export type Section = {
     func: () => void
 }
 
-export type TopProps = {
+export type TopNavProps = {
     header: string,
     sections: Section[],
     logoutFunc: () => void,
     accountFunc: () => void
 }
 
-export default function Top(props: TopProps){
+export default function TopNav(props: TopNavProps){
     return (
         <>
             <header className="bg-blue-500 text-white text-4xl p-5">
