@@ -1,10 +1,10 @@
-import TopNav from '@/components/reusable/top';
+import TopNav from '../reusable/top';
 
-type StudentTopProps = {
+type TeacherTopProps = {
 
 }
 
-export default function TeacherTop(props: StudentTopProps){
+export default function TeacherTop(props: TeacherTopProps){
     return(
         <div className="">
           <TopNav 

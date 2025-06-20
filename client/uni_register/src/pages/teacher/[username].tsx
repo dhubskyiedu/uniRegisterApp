@@ -3,11 +3,12 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { getUserInfo } from "../../functions/auth";
 import { UserInfo } from "../../interfaces/businessLogic";
-import StudentTop from '../../components/dedicated/studentTop';
+import TeacherTop from '../../components/dedicated/teacherTop';
 
 export default function Student(){
   const router = useRouter();
   const { username } = router.query;
+
   const [userInfo, setUserInfo] = useState<UserInfo>();
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function Student(){
         </div>*/
     return(
         <div className="">
-          <StudentTop></StudentTop>
+          <TeacherTop></TeacherTop>
         </div>
     );
   }
