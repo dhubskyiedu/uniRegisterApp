@@ -1,3 +1,4 @@
+import { createContext } from "react";
 export interface UserInfo{
     username: string,
     email: string,
@@ -13,3 +14,6 @@ export interface UserCreds{
     username: string,
     password: string
 }
+
+export const UserInfoContext = createContext<UserInfo | undefined>(undefined);
+

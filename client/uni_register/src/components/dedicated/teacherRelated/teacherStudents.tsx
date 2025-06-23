@@ -22,6 +22,7 @@ export default function TeacherStudents(){
                         <th className="border border-black py-2">Full name</th>
                         <th className="border border-black py-2">Email</th>
                         <th className="border border-black py-2">Group ID</th>
+                        <th className="border border-black py-2">Manage</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,7 +34,7 @@ export default function TeacherStudents(){
                             <th className="border border-black py-2">{student.firstName+" "+student.lastName}</th>
                             <th className="border border-black py-2">{student.email}</th>
                             <th className="border border-black py-2">{student.groupID ? student.groupID : "NA"}</th>
-                            <th className="border border-black py-2"><button className="bg-blue-500 text-white p-3 rounded hover:bg-blue-200 hover:text-black hover:cursor-pointer transition">Edit</button></th>
+                            <th className="border border-black py-2"><button className="bg-blue-500 text-white p-3 rounded hover:bg-blue-200 hover:text-black hover:cursor-pointer transition">Manage</button></th>
                         </tr>
                     )
                 }

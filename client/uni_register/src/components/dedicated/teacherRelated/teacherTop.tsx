@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TopNav from '../../reusable/top';
 import TeacherStudents from './teacherStudents';
+import Account from '../account';
 
 type TeacherTopProps = {
 
@@ -20,10 +21,11 @@ export default function TeacherTop(props: TeacherTopProps){
                 {name: "Mail", func: () => alert("To be implemented")},
               ]
             }
-            accountFunc={() => alert("To be implemented")}
+            accountFunc={() => setShownMenu("account")}
           ></TopNav>
           {(() => {
             if (shownMenu === "students") return <TeacherStudents></TeacherStudents>;
+            if (shownMenu === "account") return <Account></Account>;
             return "Unknown Role";
           })()}
         </div>
