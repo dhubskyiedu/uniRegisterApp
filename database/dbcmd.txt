@@ -3,13 +3,13 @@ CREATE TABLE Users (
 	email VARCHAR(255),
 	fName VARCHAR(255),
 	lName VARCHAR(255),
-	accessL INT,
 	groupID VARCHAR(4),
 	FOREIGN KEY(groupID) REFERENCES Groups(groupID) ON DELETE CASCADE
 );
 CREATE TABLE Auth (
 	username VARCHAR(255),
 	password VARCHAR(255),
+	accessL INT,
 	FOREIGN KEY(username) REFERENCES Users(username) ON DELETE CASCADE
 );
 CREATE TABLE Courses (

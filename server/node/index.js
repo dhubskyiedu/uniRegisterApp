@@ -25,6 +25,11 @@ app.use((err, req, res, next) => {
     }
 })
 
+app.use((req, res, next) => {
+  res.set('Access-Control-Allow-Origin', frontend);
+  next();
+});
+
 app.listen(PORT, () => {
     console.log("Server is listening on port 3000");
 })
@@ -33,7 +38,6 @@ app.listen(PORT, () => {
 
 // USERS
 app.post("/api/user", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     uname = req.body.username
     passwd = req.body.password
     email = req.body.email
@@ -44,14 +48,17 @@ app.post("/api/user", async (req, res) => {
     console.log(req.body);
     try{
         await dbops.createOne([
-            ["Users", ["username", uname, 32], 
-            //["password", passwd, 255],
-            ["email", email, 32],
-            ["fName", fname, 32],
-            ["lName", lname, 32],
-            ["accessL", alevel, 2]],
-            ["Auth", ["username", uname, 32],
-            ["password", passwd, 32]]
+            ["Users", 
+                ["username", uname, 32], 
+                ["email", email, 32],
+                ["fName", fname, 32],
+                ["lName", lname, 32],
+            ],
+            ["Auth", 
+                ["username", uname, 32],
+                ["password", passwd, 32], 
+                ["accessL", alevel, 2]
+            ]
         ])
         result = true
     }catch(e){
@@ -72,7 +79,10 @@ app.post("/api/user", async (req, res) => {
     }
 })
 
-function authToken(req, res, next){
+
+
+
+function authToken(req, res){
     const origin = req.headers.origin;
     const token = req.cookies.jwtToken;
     if(!token){
@@ -85,25 +95,47 @@ function authToken(req, res, next){
         if(error){
             return res.sendStatus(403);
         }
-        next();
+        if(role !== user.role){
+            console.log("USER IS: "+user);
+            return res.sendStatus(403);
+        }
     });
 }
 
-app.get("/api/user/:uname", authToken, async (req, res) => {
+
+app.get("/api/user/:uname", async (req, res) => {
+    const origin = req.headers.origin;
+    const token = req.cookies.jwtToken;
+    if(!token){
+        return res.status(401).json({"error": "invalid request: no jwt cookie"});
+    }
+    if(origin !== frontend){
+        return res.status(403).json({"error": "access denied: unauthorized frontend"});
+    }
     res.set("Access-Control-Allow-Origin", frontend);
     try{
-        user = await dbops.getOne("Users", "username", req.params.uname)
-        if(user){
-            res.status(200).json(user);
+        cookieUser = jwt.verify(token, process.env.ACCESS_SECRET);
+        dbUser = await dbops.getOne("Users", "username", req.params.uname);
+        if(dbUser){
+            if(cookieUser.username === dbUser.username){
+                res.status(200).json(user);
+            }else{
+                res.status(403).json({"error": "access denied: unauthorized user"});
+            }
         }else{
             res.status(404).json({"error": "not found"});
         }
-    }catch(e){
-        res.sendStatus(500)
+    }catch(error){
+        return res.sendStatus(500);
     }
+    jwt.verify(token, process.env.ACCESS_SECRET, (error, user) => {
+        if(error){
+            return res.sendStatus(403);
+        }
+    });
 })
+
 app.get("/api/users", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     dbops.getAll("Users", req.query.info)
     .then((result) => {
         res.status(200).send(result)
@@ -113,7 +145,6 @@ app.get("/api/users", async (req, res) => {
     })
 })
 app.delete("/api/user", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     try{
         //await dbops.deleteUser(req.body.uname)
         await dbops.deleteOne("Users", "username", req.body.username)
@@ -124,7 +155,6 @@ app.delete("/api/user", async (req, res) => {
     }
 })
 app.put("/api/user", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     try{
         await dbops.alterOne("Users", "username", [
             ["username", req.body.username],
@@ -147,12 +177,11 @@ app.put("/api/user", async (req, res) => {
 
 
 app.post("/api/user/verify", async(req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     try{
         user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
         if(user){
             if(req.body.passwd == user.password){
-                const token = jwt.sign(user.password, process.env.ACCESS_SECRET);
+                const token = jwt.sign(user, process.env.ACCESS_SECRET);
                 res.cookie('jwtToken', token, {
                     httpOnly: true,
                     secure: false,
@@ -173,7 +202,6 @@ app.post("/api/user/verify", async(req, res) => {
 
 // COURSES
 app.post("/api/course", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     courseID = req.body.courseID;
     courseName = req.body.name;
     courseDesc = req.body.description;
@@ -198,7 +226,6 @@ app.post("/api/course", async (req, res) => {
     }
 })
 app.get("/api/course/:id", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     course = await dbops.getOne("Courses", "courseID", req.params.id)
     if(course){
         res.status(200).send(course)
@@ -207,7 +234,6 @@ app.get("/api/course/:id", async (req, res) => {
     }
 })
 app.get("/api/courses", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     dbops.getAll("Courses", req.query.info)
     .then((result) => {
         res.status(200).send(result)
@@ -217,8 +243,6 @@ app.get("/api/courses", async (req, res) => {
     })
 })
 app.delete("/api/course", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
-    //dbops.deleteCourse(req.body.courseID)
     dbops.deleteOne("Courses", "courseID", req.body.courseID)
     .then((result) => {
         res.sendStatus(204)
@@ -229,7 +253,6 @@ app.delete("/api/course", async (req, res) => {
 })
 app.put("/api/course", async (req, res) => {
     res.set("Access-Control-Allow-Origin", frontend);
-    //dbops.alterCourse(req.body)
     dbops.alterOne("Courses", "courseID", [
         ["courseID", req.body.courseID],
         ["name", req.body.name],
@@ -245,7 +268,6 @@ app.put("/api/course", async (req, res) => {
 
 // Groups
 app.post("/api/group", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     groupID = req.body.groupID
     courseID = req.body.courseID
     dbops.createOne([
@@ -269,7 +291,6 @@ app.post("/api/group", async (req, res) => {
     })
 })
 app.get("/api/group/:id", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     try{
         result = await dbops.getOne("Groups", "groupID", req.params.id)
         if(result){
@@ -282,7 +303,6 @@ app.get("/api/group/:id", async (req, res) => {
     }
 })
 app.get("/api/groups", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     dbops.getAll("Groups", req.query.info)
     .then((result) => {
         res.status(200).send(result)
@@ -292,7 +312,6 @@ app.get("/api/groups", async (req, res) => {
     })
 })
 app.delete("/api/group", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     //dbops.deleteGroup(req.body.groupID)
     dbops.deleteOne("Groups", "groupID", req.body.groupID)
     .then((result) => {
@@ -303,7 +322,6 @@ app.delete("/api/group", async (req, res) => {
     })
 })
 app.put("/api/group", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     //dbops.alterGroup(req.body)
     dbops.alterOne("Groups", "groupID", [
         ["groupID", req.body.groupID],
@@ -319,7 +337,6 @@ app.put("/api/group", async (req, res) => {
 
 // Subjects
 app.post("/api/subject", (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     subjectid = req.body.subjectID
     subjectdesc = req.body.description
     subjectname = req.body.name
@@ -344,7 +361,6 @@ app.post("/api/subject", (req, res) => {
         })
 })
 app.get("/api/subject/:id", (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     dbops.getOne("Subjects", "subjectID", req.params.id)
     .then((result) => {
         if(result){
@@ -358,7 +374,6 @@ app.get("/api/subject/:id", (req, res) => {
     })
 })
 app.get("/api/subjects", async (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     dbops.getAll("Subjects", req.query.info)
     .then((result) => {
         res.status(200).send(result)
@@ -368,7 +383,6 @@ app.get("/api/subjects", async (req, res) => {
     })
 })
 app.delete("/api/subject", (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     //dbops.deleteSubject(req.body.subjectID)
     dbops.deleteOne("Subjects", "subjectID", req.body.subjectID)
     .then((result) => {
@@ -379,7 +393,6 @@ app.delete("/api/subject", (req, res) => {
     })
 })
 app.put("/api/subject", (req, res) => {
-    res.set("Access-Control-Allow-Origin", frontend);
     //dbops.alterSubject(req.body)
     dbops.alterOne("Subjects", "subjectID", [
         ["subjectID", req.body.subjectID],

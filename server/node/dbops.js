@@ -1,5 +1,5 @@
 const sqlite = require("sqlite3")
-const db = new sqlite.Database("./data.db", sqlite.OPEN_READWRITE, (err) => {
+const db = new sqlite.Database("../../database/data.db", sqlite.OPEN_READWRITE, (err) => {
     if(err){
         console.log(err.message)
     }else{

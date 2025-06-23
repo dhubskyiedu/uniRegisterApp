@@ -30,6 +30,12 @@ export default function Student(){
             Error
         </div>
     );
+  }else if(userInfo.role !== "teacher"){
+    return(
+        <div>
+            Access prohibited!
+        </div>
+    );
   }else{
     /*<div>
         <h1>{userInfo ? userInfo.username : ""}</h1>

@@ -10,6 +10,6 @@ services:
       - backend
   backend:
     build:
-      context: ./server/node
+      context: ./server
     ports:
       - "3001:3001"

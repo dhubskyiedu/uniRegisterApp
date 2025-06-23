@@ -34,7 +34,6 @@ export default function SignIn() {
             let success: number = await userAuth(creds);
             if(success === 0){
                 let user: UserInfo | number = await getUserInfo(creds.username);
-                alert(user)
                 if(typeof(user) != "number"){
                     if(user.role == "student"){
                         location.replace("/student/"+username);
