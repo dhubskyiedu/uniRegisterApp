@@ -28,7 +28,7 @@ export default function TopNav(props: TopNavProps){
             <nav className="bg-blue-200 flex">
                 {
                     props.sections.map(
-                        i => <div onClick={i.func} className="p-2 text-2xl hover:bg-blue-500 hover:text-white hover:cursor-pointer">
+                        i => <div onClick={i.func} className="p-2 text-2xl hover:bg-blue-500 hover:text-white hover:cursor-pointer transition">
                             {i.name}
                         </div>
                     )

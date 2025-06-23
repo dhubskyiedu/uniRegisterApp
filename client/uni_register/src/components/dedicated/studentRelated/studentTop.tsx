@@ -1,4 +1,4 @@
-import TopNav from '../reusable/top';
+import TopNav from '../../reusable/top';
 
 type StudentTopProps = {
 

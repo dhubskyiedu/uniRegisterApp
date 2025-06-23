@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { getUserInfo } from "../../functions/auth";
 import { UserInfo } from "../../interfaces/businessLogic";
-import StudentTop from '../../components/dedicated/studentTop';
+import StudentTop from '../../components/dedicated/studentRelated/studentTop';
 
 export default function Student(){
   const router = useRouter();

@@ -114,10 +114,10 @@ app.get("/api/user/:uname", async (req, res) => {
     }
     res.set("Access-Control-Allow-Origin", frontend);
     try{
-        cookieUser = jwt.verify(token, process.env.ACCESS_SECRET);
-        dbUser = await dbops.getOne("Users", "username", req.params.uname);
+        const cookieUsername = jwt.verify(token, process.env.ACCESS_SECRET);
+        const dbUser = await dbops.getOne("Users", "username", req.params.uname);
         if(dbUser){
-            if(cookieUser.username === dbUser.username){
+            if(cookieUsername === dbUser.username){
                 res.status(200).json(user);
             }else{
                 res.status(403).json({"error": "access denied: unauthorized user"});
@@ -128,22 +128,66 @@ app.get("/api/user/:uname", async (req, res) => {
     }catch(error){
         return res.sendStatus(500);
     }
-    jwt.verify(token, process.env.ACCESS_SECRET, (error, user) => {
-        if(error){
-            return res.sendStatus(403);
-        }
-    });
 })
 
 app.get("/api/users", async (req, res) => {
-    dbops.getAll("Users", req.query.info)
-    .then((result) => {
-        res.status(200).send(result)
-    })
-    .catch((err) => {
-        res.sendStatus(500)
-    })
+    const origin = req.headers.origin;
+    const token = req.cookies.jwtToken;
+    if(!token){
+        return res.status(401).json({"error": "invalid request: no jwt cookie"});
+    }
+    if(origin !== frontend){
+        return res.status(403).json({"error": "access denied: unauthorized frontend"});
+    }
+    res.set("Access-Control-Allow-Origin", frontend);
+    try{
+        const cookieUsername = jwt.verify(token, process.env.ACCESS_SECRET);
+        const dbUser = await dbops.getOne("Users", "username", cookieUsername);
+        if(dbUser){
+            if(dbUser.accessL == 0){
+                res.status(403).json({"error": "unauthorized access"});
+            }else{
+                dbops.getAll("Users", req.query.info)
+                    .then(async (result) => {
+                        const finalResult = [];
+                        for(let i = 0; i<result.length; i++){
+                            const roledUser = result[i];
+                            try{
+                                const auth = await dbops.getOne("Auth", "username", roledUser.username);
+                                roledUser.accessL = auth.accessL;
+                            }catch(error){
+                                continue;
+                            }
+                            switch(roledUser.accessL){
+                                case 0:
+                                    roledUser.role = "student";
+                                    break;
+                                case 1:
+                                    roledUser.role = "teacher";
+                                    break;
+                                case 2:
+                                    roledUser.role = "admin";
+                                    break;
+                                default:
+                                    roledUser.role = "other";
+                                    break;
+                            }
+                            finalResult.push(roledUser);
+                        }
+                        res.status(200).send(finalResult);
+                    })
+                    .catch((err) => {
+                        res.sendStatus(500);
+                    })
+            }
+        }else{
+            res.status(403).json({"error": "unauthorized access"});
+        }
+    }catch(error){
+        return res.sendStatus(500);
+    }
 })
+
 app.delete("/api/user", async (req, res) => {
     try{
         //await dbops.deleteUser(req.body.uname)
@@ -154,6 +198,7 @@ app.delete("/api/user", async (req, res) => {
         res.sendStatus(500)
     }
 })
+
 app.put("/api/user", async (req, res) => {
     try{
         await dbops.alterOne("Users", "username", [
@@ -174,14 +219,12 @@ app.put("/api/user", async (req, res) => {
     }
 })
 
-
-
 app.post("/api/user/verify", async(req, res) => {
     try{
         user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
         if(user){
             if(req.body.passwd == user.password){
-                const token = jwt.sign(user, process.env.ACCESS_SECRET);
+                const token = jwt.sign(user.username, process.env.ACCESS_SECRET);
                 res.cookie('jwtToken', token, {
                     httpOnly: true,
                     secure: false,

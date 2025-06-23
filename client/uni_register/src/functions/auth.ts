@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie';
 import { User, UserInfo, UserCreds } from "../interfaces/businessLogic";
 
 const SERVERPORT = 3001;
