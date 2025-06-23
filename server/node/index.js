@@ -200,6 +200,15 @@ app.post("/api/user/verify", async(req, res) => {
     }
 })
 
+app.post("/api/user/logout", async(req, res) => {
+    res.cookie('jwtToken', "", {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'Strict',
+        expires: new Date(0)
+    }).sendStatus(200);
+})
+
 // COURSES
 app.post("/api/course", async (req, res) => {
     courseID = req.body.courseID;

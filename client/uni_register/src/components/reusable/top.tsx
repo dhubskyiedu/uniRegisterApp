@@ -1,3 +1,5 @@
+import { userLogOut } from "../../functions/auth";
+
 export type Section = {
     name: string,
     func: () => void
@@ -6,11 +8,18 @@ export type Section = {
 export type TopNavProps = {
     header: string,
     sections: Section[],
-    logoutFunc: () => void,
     accountFunc: () => void
 }
 
 export default function TopNav(props: TopNavProps){
+    const logOutFunc = async () => {
+        const success = await userLogOut();
+        if(success){
+            location.replace("/signin");
+        }else{
+            alert("Error logging out!");
+        }
+    }
     return (
         <>
             <header className="bg-blue-500 text-white text-4xl p-5">
@@ -26,7 +35,7 @@ export default function TopNav(props: TopNavProps){
                 }
                 <div className="ml-auto flex">
                     <div
-                        onClick = {props.logoutFunc} 
+                        onClick = {logOutFunc} 
                         className="p-2 text-2xl hover:bg-blue-500 hover:text-white hover:cursor-pointer">
                             Log out
                     </div>

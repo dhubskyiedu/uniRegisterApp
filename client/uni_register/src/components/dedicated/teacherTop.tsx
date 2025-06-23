@@ -17,7 +17,6 @@ export default function TeacherTop(props: TeacherTopProps){
                 {name: "Mail", func: () => alert("To be implemented")},
               ]
             }
-            logoutFunc={() => alert("To be implemented")}
             accountFunc={() => alert("To be implemented")}
           ></TopNav>
         </div>

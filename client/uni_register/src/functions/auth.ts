@@ -145,6 +145,26 @@ export async function userAuth(user: UserCreds): Promise<number>{
 
 }
 
+export async function userLogOut(): Promise<boolean>{
+    try{
+        const result = await fetch("http://localhost:"+SERVERPORT+"/api/user/logout", {
+            method: "POST",
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+        if(result){
+            if(result.ok){
+                return true;
+            }
+        }
+        return false;
+    }catch(error){
+        return false;
+    }
+}
+
 export async function getUserInfo(username: string): Promise<UserInfo | number>{
     try{
         const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/"+username, {
