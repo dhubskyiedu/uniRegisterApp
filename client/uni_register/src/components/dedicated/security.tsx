@@ -32,7 +32,7 @@ export default function Security(){
             }
         }catch(error){
             alert("Server error!");
-            return 5;
+            return;
         }
         const newUserDetails: User = {
             password: password1,
@@ -41,6 +41,63 @@ export default function Security(){
             lastName: "",
             role: "",
             email: ""
+        }
+        const result = await alterUser(newUserDetails);
+        if(!result){
+            alert("Success!");
+        }else{
+            alert("Error");
+        }
+    }
+    const alterEmailFunc = async () => {
+        const emailOk = validateEmail(newEmail);
+        if(!(!emailOk && newEmail === newEmail2)){
+            alert("Wrong email format!");
+            return;
+        }
+        try{
+            const res = await userValPasswd({username: userInfo!.userInfo.username, password: oldPassword});
+            if(res){
+                alert("Wrong current password!");
+                return;
+            }
+        }catch(error){
+            alert("Server error!");
+            return;
+        }
+        const newUserDetails: User = {
+            password: "",
+            username: userInfo?.userInfo.username || "",
+            firstName: "",
+            lastName: "",
+            role: "",
+            email: newEmail
+        }
+        const result = await alterUser(newUserDetails);
+        if(!result){
+            alert("Success!");
+        }else{
+            alert("Error");
+        }
+    }
+    const deleteAccountFunc = async () => {
+        try{
+            const res = await userValPasswd({username: userInfo!.userInfo.username, password: oldPassword});
+            if(res){
+                alert("Wrong current password!");
+                return;
+            }
+        }catch(error){
+            alert("Server error!");
+            return;
+        }
+        const newUserDetails: User = {
+            password: "",
+            username: userInfo?.userInfo.username || "",
+            firstName: "",
+            lastName: "",
+            role: "",
+            email: newEmail
         }
         const result = await alterUser(newUserDetails);
         if(!result){
@@ -101,7 +158,7 @@ export default function Security(){
                         <span>
                             <button 
                                 className="bg-blue-500 text-white p-3 rounded hover:bg-blue-200 hover:text-black hover:cursor-pointer transition"
-                                onClick={() => {"alterUserFunc"}}>Save details
+                                onClick={() => {alterEmailFunc}}>Save details
                             </button>
                         </span>    
                     </div>
