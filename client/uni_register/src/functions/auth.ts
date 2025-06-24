@@ -44,19 +44,19 @@ export function validateEmail(email: string): number{
 */
 export async function validateUsername(username: string): Promise<number>{
     try{
-        let url = "http://localhost:"+SERVERPORT+"/api/user/"+username;
+        let url = "http://localhost:"+SERVERPORT+"/api/user/validateuname/"+username;
         const response = await fetch(url, {
             method: "GET",
-            credentials: "include"
         });
         if(response.status == 200){
-            return 1;
-        }else if(response.status == 404){
             return 0;
+        }else if(response.status == 409){
+            return 1;
         }else{
+            alert(response.status)
             return 2;
         }
-    }catch(error: any){
+    }catch(error){
         return 2;
     }
 }
@@ -116,7 +116,7 @@ export async function userAuth(user: UserCreds): Promise<number>{
     try{
         const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/verify", {
             method: "POST",
-            credentials: 'include',
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -132,6 +132,7 @@ export async function userAuth(user: UserCreds): Promise<number>{
             return 1; // wrong password
         }
         if(response.status == 500){
+            
             return 3; // server error
         }
         if(response.status == 200){
@@ -198,6 +199,7 @@ export async function userLogOut(): Promise<boolean>{
 
 export async function getUserInfo(username: string): Promise<UserInfo | number>{
     try{
+        
         const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/"+username, {
             method: "GET",
             credentials: "include",
@@ -233,6 +235,7 @@ export async function getUserInfo(username: string): Promise<UserInfo | number>{
         }
         return foundUser;
     }catch(error2){
+        alert(error2)
         return 3; // server error
     }
 }

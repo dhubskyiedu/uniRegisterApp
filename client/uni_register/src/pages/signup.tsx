@@ -113,6 +113,11 @@ export default function SignUp() {
             let successRegister = await createUser(user);
             if(successRegister == 0){
                 alert("Success");
+                if(user.role == "student"){
+                    location.replace("/student/"+username);
+                }else if(user.role == "teacher"){
+                    location.replace("/teacher/"+username);
+                }
             }else{
                 alert(successRegister);
             }
@@ -164,6 +169,11 @@ export default function SignUp() {
             </form>
             <button onClick={() => signUp()} className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
                 Sign up
+            </button>
+            <br/>
+            <p>Already have an account?</p>
+            <button onClick={() => location.replace("/signin")} className="bg-sky-300 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
+                Sign in
             </button>
         </div>
     );

@@ -96,6 +96,7 @@ export default function Security(){
             if(!result){
                 alert("Success!");
                 userLogOut();
+                location.replace("/signin");
             }else{
                 alert("Error");
             }

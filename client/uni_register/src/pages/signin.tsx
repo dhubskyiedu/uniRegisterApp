@@ -43,7 +43,6 @@ export default function SignIn() {
                         location.replace("/admin/"+username);
                     }
                 }else{
-                    
                     let res: string[] = [...emptyFields];
                     res.push("serverErr");
                     setEmptyFields(res);
@@ -83,6 +82,11 @@ export default function SignIn() {
             </form>
             <button onClick={() => signIn()} className="bg-sky-500 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
                 Sign in
+            </button>
+            <br/>
+            <p>Don't have an account?</p>
+            <button onClick={() => location.replace("/signup")} className="bg-sky-300 text-white p-5 m-2 w-70 rounded-xl hover:bg-pink-500">
+                Sign up
             </button>
         </div>
     );

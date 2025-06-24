@@ -10,10 +10,8 @@ require("dotenv").config();
 const PORT = 3001;
 const frontend = 'http://localhost:3000';
 app.use(cookieParser());
-app.use(cors({
-    origin: frontend, // your React app's URL
-    credentials: true
-}))
+
+
 
 app.use(parser.json());
 app.use(parser.urlencoded({extended: false}));
@@ -25,14 +23,14 @@ app.use((err, req, res, next) => {
     }
 })
 
-app.use((req, res, next) => {
-  res.set('Access-Control-Allow-Origin', frontend);
-  next();
-});
+app.use(cors({
+    origin: frontend,
+    credentials: true
+}));
 
 app.listen(PORT, () => {
     console.log("Server is listening on port 3000");
-})
+});
 
 
 
@@ -79,16 +77,68 @@ app.post("/api/user", async (req, res) => {
     }
 })
 
+app.get("/api/user/validateuname/:uname", async (req, res) => {
+    const origin = req.headers.origin;
+    console.log("A")
+    if(origin !== frontend){
+        return res.status(403).json({"error": "access denied: unauthorized frontend"});
+    }
+    console.log("B")
+    res.set("Access-Control-Allow-Origin", frontend);
+    console.log("C")
+    try{
+        const dbUser = await dbops.getOne("Users", "username", req.params.uname);
+        console.log("D")
+        if(dbUser){
+            console.log("E")
+            res.status(409).json({"error": "user exists"});
+        }else{
+            console.log("F")
+            res.sendStatus(200);
+            console.log("X")
+        }
+    }catch(error){
+        console.log(error)
+        return res.sendStatus(500);
+    }
+})
+
+app.post("/api/user/verify", async(req, res) => {
+    try{
+        user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
+        if(user){
+            if(req.body.passwd == user.password){
+                const token = jwt.sign(user.username, process.env.ACCESS_SECRET);
+                console.log("MLP")
+                return res.cookie('jwtToken', token, {
+                    httpOnly: true,
+                    secure: false,
+                    sameSite: 'Strict',
+                    maxAge: 24 * 60 * 60 * 1000
+                }).sendStatus(200);
+            }else{
+                res.status(403).json({error: "wrong password"});
+            }
+        }else{
+            res.status(404).json({error: "non-existent username"});
+        }
+    }catch(e){
+        console.log(e)
+        res.sendStatus(500);
+    }
+})
+
 app.get("/api/user/:uname", async (req, res) => {
     const origin = req.headers.origin;
     const token = req.cookies.jwtToken;
     if(!token){
+        console.log("QWERTY")
         return res.status(401).json({"error": "invalid request: no jwt cookie"});
     }
     if(origin !== frontend){
+        console.log("ZAQ")
         return res.status(403).json({"error": "access denied: unauthorized frontend"});
     }
-    res.set("Access-Control-Allow-Origin", frontend);
     try{
         const cookieUsername = jwt.verify(token, process.env.ACCESS_SECRET);
         const dbUser = await dbops.getOne("Users", "username", req.params.uname);
@@ -216,29 +266,7 @@ app.put("/api/user", async (req, res) => {
     }
 })
 
-app.post("/api/user/verify", async(req, res) => {
-    try{
-        user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
-        if(user){
-            if(req.body.passwd == user.password){
-                const token = jwt.sign(user.username, process.env.ACCESS_SECRET);
-                res.cookie('jwtToken', token, {
-                    httpOnly: true,
-                    secure: false,
-                    sameSite: 'Strict',
-                    maxAge: 24 * 60 * 60 * 1000
-                }).sendStatus(200);
-            }else{
-                res.status(403).json({error: "wrong password"});
-            }
-        }else{
-            res.status(404).json({error: "non-existent username"});
-        }
-    }catch(e){
-        console.log(e)
-        res.sendStatus(500);
-    }
-})
+
 
 app.post("/api/user/validate", async(req, res) => {
     try{
