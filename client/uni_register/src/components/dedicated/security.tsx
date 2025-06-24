@@ -1,7 +1,7 @@
 import { UserInfo, UserInfoContext, User } from "../../interfaces/businessLogic";
 import { getStudents } from "../../functions/info";
 import { useEffect, useState, useContext } from "react";
-import { alterUser, userValPasswd, validateEmail, validatePassword } from "../../functions/auth";
+import { alterUser, deleteUser, userLogOut, userValPasswd, validateEmail, validatePassword } from "../../functions/auth";
 
 export default function Security(){
     const userInfo = useContext(UserInfoContext);
@@ -81,29 +81,24 @@ export default function Security(){
         }
     }
     const deleteAccountFunc = async () => {
-        try{
-            const res = await userValPasswd({username: userInfo!.userInfo.username, password: oldPassword});
-            if(res){
-                alert("Wrong current password!");
+        if(confirm("Are you sure?")){
+            try{
+                const res = await userValPasswd({username: userInfo!.userInfo.username, password: oldPassword});
+                if(res){
+                    alert("Wrong current password!");
+                    return;
+                }
+            }catch(error){
+                alert("Server error!");
                 return;
             }
-        }catch(error){
-            alert("Server error!");
-            return;
-        }
-        const newUserDetails: User = {
-            password: "",
-            username: userInfo?.userInfo.username || "",
-            firstName: "",
-            lastName: "",
-            role: "",
-            email: newEmail
-        }
-        const result = await alterUser(newUserDetails);
-        if(!result){
-            alert("Success!");
-        }else{
-            alert("Error");
+            const result = await deleteUser(userInfo?.userInfo.username || "");
+            if(!result){
+                alert("Success!");
+                userLogOut();
+            }else{
+                alert("Error");
+            }
         }
     }
     return(
@@ -158,7 +153,7 @@ export default function Security(){
                         <span>
                             <button 
                                 className="bg-blue-500 text-white p-3 rounded hover:bg-blue-200 hover:text-black hover:cursor-pointer transition"
-                                onClick={() => {alterEmailFunc}}>Save details
+                                onClick={alterEmailFunc}>Save details
                             </button>
                         </span>    
                     </div>
@@ -172,7 +167,7 @@ export default function Security(){
                         <span>
                             <button 
                                 className="bg-blue-500 text-white p-3 rounded hover:bg-blue-200 hover:text-black hover:cursor-pointer transition"
-                                onClick={() => {"alterUserFunc"}}>Delete account
+                                onClick={deleteAccountFunc}>Delete account
                             </button>
                         </span>    
                     </div>

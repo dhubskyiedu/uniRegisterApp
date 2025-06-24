@@ -177,6 +177,7 @@ app.delete("/api/user", async (req, res) => {
         res.sendStatus(500);
     }
 })
+
 app.put("/api/user", async (req, res) => {
     console.log("YES")
     const userChangeArr = [];

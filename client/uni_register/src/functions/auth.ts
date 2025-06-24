@@ -275,3 +275,25 @@ export async function alterUser(user: User){
         return 2; // server error
     }
 }
+
+export async function deleteUser(username: string){
+    try{
+        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user", {
+            method: "DELETE",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                "username": username
+            })
+        })
+        if(response.ok){
+            return 0; // success
+        }else if(response.status == 400){
+            return 1; // no username provided
+        }
+    }catch(error){
+        return 2; // server error
+    }
+}
