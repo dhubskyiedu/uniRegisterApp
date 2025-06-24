@@ -15,5 +15,10 @@ export interface UserCreds{
     password: string
 }
 
-export const UserInfoContext = createContext<UserInfo | undefined>(undefined);
+export type UserInfoContextType = {
+    userInfo: UserInfo,
+    setUserInfo: (info: UserInfo) => void
+}
+
+export const UserInfoContext = createContext<UserInfoContextType | undefined>(undefined);
 

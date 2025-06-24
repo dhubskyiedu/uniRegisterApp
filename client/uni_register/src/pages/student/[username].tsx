@@ -2,7 +2,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { getUserInfo } from "../../functions/auth";
-import { UserInfo } from "../../interfaces/businessLogic";
+import { UserInfo, UserInfoContext } from "../../interfaces/businessLogic";
 import StudentTop from '../../components/dedicated/studentRelated/studentTop';
 
 export default function Student(){
@@ -43,7 +43,13 @@ export default function Student(){
         </div>*/
     return(
         <div className="">
-          <StudentTop></StudentTop>
+          <UserInfoContext 
+            value = {
+              {userInfo: userInfo, setUserInfo: (info: UserInfo) => setUserInfo(info)}
+            }
+          >
+            <StudentTop></StudentTop>
+          </UserInfoContext>
         </div>
     );
   }

@@ -4,11 +4,10 @@ import { useEffect, useState, useContext } from "react";
 import { alterUser } from "../../functions/auth";
 
 export default function Account(){
-    const [studentsLst, setStudentsLst] = useState<UserInfo[]>();
     const userInfo = useContext(UserInfoContext);
-    const [username, setUsername] = useState(userInfo?.username);
-    const [firstName, setFirstName] = useState(userInfo?.firstName);
-    const [lastName, setLastName] = useState(userInfo?.lastName);
+    const [username, setUsername] = useState(userInfo?.userInfo.username);
+    const [firstName, setFirstName] = useState(userInfo?.userInfo.firstName);
+    const [lastName, setLastName] = useState(userInfo?.userInfo.lastName);
     const alterUserFunc = async () => {
         const newUserDetails: User = {
             password: "",
@@ -20,6 +19,13 @@ export default function Account(){
         }
         const result = await alterUser(newUserDetails);
         if(!result){
+            const newUserInfo = userInfo?.userInfo;
+            if(newUserInfo){
+                newUserInfo.username = username || newUserInfo.username;
+                newUserInfo.firstName = firstName || newUserInfo.firstName;
+                newUserInfo.lastName = lastName || newUserInfo.lastName;
+                userInfo?.setUserInfo(newUserInfo);
+            }
             alert("Success!");
         }else{
             alert("Error");

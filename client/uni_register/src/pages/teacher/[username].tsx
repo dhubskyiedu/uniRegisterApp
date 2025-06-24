@@ -36,7 +36,7 @@ export default function Teacher(){
   }else{
     return(
         <div className="">
-          <UserInfoContext value={userInfo}>
+          <UserInfoContext value={{userInfo: userInfo, setUserInfo: (info: UserInfo) => setUserInfo(info)}}>
             <TeacherTop></TeacherTop>
           </UserInfoContext>
         </div>
