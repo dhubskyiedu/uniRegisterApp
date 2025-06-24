@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TopNav from '../../reusable/top';
 import Account from '../account';
+import Security from '../security';
 
 type StudentTopProps = {
 
@@ -25,6 +26,7 @@ export default function StudentTop(props: StudentTopProps){
           ></TopNav>
           {(() => {
             if (shownMenu === "account") return <Account switchToSecurityMenu={() => setShownMenu("security")}></Account>;
+            if (shownMenu === "security") return <Security></Security>;
             return "Unknown Role";
           })()}
         </div>

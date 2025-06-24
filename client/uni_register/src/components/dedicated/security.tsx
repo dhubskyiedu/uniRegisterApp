@@ -1,7 +1,7 @@
 import { UserInfo, UserInfoContext, User } from "../../interfaces/businessLogic";
 import { getStudents } from "../../functions/info";
 import { useEffect, useState, useContext } from "react";
-import { alterUser } from "../../functions/auth";
+import { alterUser, userValPasswd, validateEmail, validatePassword } from "../../functions/auth";
 
 export default function Security(){
     const userInfo = useContext(UserInfoContext);
@@ -10,29 +10,45 @@ export default function Security(){
     const [oldPassword, setOldPassword] = useState("");
     const [newEmail, setNewEmail] = useState("");
     const [newEmail2, setNewEmail2] = useState("");
-    /*const alterUserFunc = async () => {
+    const alterPasswordFunc = async () => {
+        const passwdOk = validatePassword(password1);
+        if(!(!passwdOk && password1 === password2)){
+            if(passwdOk == 2){
+                alert("The password must be more than 8 symbols!");
+                return;
+            }else if(passwdOk == 3){ 
+                alert("The password must include small, big letters, and numbers!");
+                return;
+            }else{
+                alert("The passwords don't match!");
+                return;
+            }
+        }
+        try{
+            const res = await userValPasswd({username: userInfo!.userInfo.username, password: oldPassword});
+            if(res){
+                alert("Wrong current password!");
+                return;
+            }
+        }catch(error){
+            alert("Server error!");
+            return 5;
+        }
         const newUserDetails: User = {
-            password: "",
-            username: username || "",
-            firstName: firstName || "",
-            lastName: lastName || "",
+            password: password1,
+            username: userInfo?.userInfo.username || "",
+            firstName: "",
+            lastName: "",
             role: "",
             email: ""
         }
         const result = await alterUser(newUserDetails);
         if(!result){
-            const newUserInfo = userInfo?.userInfo;
-            if(newUserInfo){
-                newUserInfo.username = username || newUserInfo.username;
-                newUserInfo.firstName = firstName || newUserInfo.firstName;
-                newUserInfo.lastName = lastName || newUserInfo.lastName;
-                userInfo?.setUserInfo(newUserInfo);
-            }
             alert("Success!");
         }else{
             alert("Error");
         }
-    }*/
+    }
     return(
         <div className="flex items-center justify-center text-2xl text-black flex flex-col justify-center items-center p-10">
             <div className="space-y-8">
@@ -63,7 +79,7 @@ export default function Security(){
                         <span>
                             <button 
                                 className="bg-blue-500 text-white p-3 rounded hover:bg-blue-200 hover:text-black hover:cursor-pointer transition"
-                                onClick={() => {"alterUserFunc"}}>Save details
+                                onClick={alterPasswordFunc}>Save details
                             </button>
                         </span>    
                     </div>

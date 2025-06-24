@@ -6,7 +6,7 @@ const SERVERPORT = 3001;
 /*
     Outcome codes:
     0 - success
-    2 - less than 12 symbols
+    2 - less than 8 symbols
     3 - low complexity (small, capital letters, numbers required)
 */
 export function validatePassword(password: string): number{
@@ -115,6 +115,38 @@ export async function createUser(user: User){
 export async function userAuth(user: UserCreds): Promise<number>{
     try{
         const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/verify", {
+            method: "POST",
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                uname: user.username,
+                passwd: user.password,
+            })
+        })
+        if(response.status == 404){
+            return 2; // username does not exist
+        }
+        if(response.status == 403){
+            return 1; // wrong password
+        }
+        if(response.status == 500){
+            return 3; // server error
+        }
+        if(response.status == 200){
+            return 0;
+        }
+        return 3; // other server error
+    }catch(error){
+        return 3; // technical error
+    }
+
+}
+
+export async function userValPasswd(user: UserCreds): Promise<number>{
+    try{
+        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/validate", {
             method: "POST",
             credentials: 'include',
             headers: {

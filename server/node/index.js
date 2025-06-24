@@ -79,30 +79,6 @@ app.post("/api/user", async (req, res) => {
     }
 })
 
-
-
-
-function authToken(req, res){
-    const origin = req.headers.origin;
-    const token = req.cookies.jwtToken;
-    if(!token){
-        return res.sendStatus(401);
-    }
-    if(origin !== frontend){
-        return res.sendStatus(403);
-    }
-    jwt.verify(token, process.env.ACCESS_SECRET, (error, user) => {
-        if(error){
-            return res.sendStatus(403);
-        }
-        if(role !== user.role){
-            console.log("USER IS: "+user);
-            return res.sendStatus(403);
-        }
-    });
-}
-
-
 app.get("/api/user/:uname", async (req, res) => {
     const origin = req.headers.origin;
     const token = req.cookies.jwtToken;
@@ -259,6 +235,24 @@ app.post("/api/user/verify", async(req, res) => {
         }
     }catch(e){
         console.log(e)
+        res.sendStatus(500);
+    }
+})
+
+app.post("/api/user/validate", async(req, res) => {
+    try{
+        user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
+        if(user){
+            if(req.body.passwd == user.password){
+                const token = jwt.sign(user.username, process.env.ACCESS_SECRET);
+                res.sendStatus(200);
+            }else{
+                res.status(403).json({error: "wrong password"});
+            }
+        }else{
+            res.status(404).json({error: "non-existent username"});
+        }
+    }catch(e){
         res.sendStatus(500);
     }
 })
