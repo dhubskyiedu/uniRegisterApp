@@ -37,3 +37,8 @@
 ## Database is SQLite-based
 - uses SQL queries
 - might be substituted with TypeORM later
+
+## Security
+- role-based authentication
+- JWT secure http-only cookies session security
+- dedicated frontend verification
