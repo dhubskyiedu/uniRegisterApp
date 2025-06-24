@@ -2,12 +2,14 @@
 ## created by Denys Hubskyi
 
 ## The system is capable of:
-### as per 20/06/2025:
+### as per 24/06/2025:
 - sign in and sign up users with different roles (teachers, students)
 - keep them securely logged in during the same session unless they log out
 - redirect them to the appropriate windows depending on their roles
+- teachers view students list
+- users change their personal details (first, last names) and security details (password, email)
+- users are able to delete their accounts
 ### planned:
-- changing password and details of users
 - enroling to courses by students
 - submitting files by students
 - grading students by teachers
