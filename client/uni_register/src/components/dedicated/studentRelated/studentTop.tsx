@@ -24,7 +24,7 @@ export default function StudentTop(props: StudentTopProps){
             accountFunc={() => setShownMenu("account")}
           ></TopNav>
           {(() => {
-            if (shownMenu === "account") return <Account></Account>;
+            if (shownMenu === "account") return <Account switchToSecurityMenu={() => setShownMenu("security")}></Account>;
             return "Unknown Role";
           })()}
         </div>

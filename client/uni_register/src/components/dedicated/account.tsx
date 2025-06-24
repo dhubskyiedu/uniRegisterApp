@@ -3,7 +3,11 @@ import { getStudents } from "../../functions/info";
 import { useEffect, useState, useContext } from "react";
 import { alterUser } from "../../functions/auth";
 
-export default function Account(){
+type AccountMenuProps = {
+    switchToSecurityMenu: () => void
+}
+
+export default function Account(props: AccountMenuProps){
     const userInfo = useContext(UserInfoContext);
     const [username, setUsername] = useState(userInfo?.userInfo.username);
     const [firstName, setFirstName] = useState(userInfo?.userInfo.firstName);
@@ -56,7 +60,7 @@ export default function Account(){
                     <span>
                         <button 
                             className="bg-blue-500 text-white p-3 rounded hover:bg-blue-200 hover:text-black hover:cursor-pointer transition"
-                            onClick={() => {}}>Change password
+                            onClick={props.switchToSecurityMenu}>Security details
                         </button>
                     </span>
                 </div>
