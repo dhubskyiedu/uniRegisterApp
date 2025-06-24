@@ -116,9 +116,12 @@ app.get("/api/user/:uname", async (req, res) => {
     try{
         const cookieUsername = jwt.verify(token, process.env.ACCESS_SECRET);
         const dbUser = await dbops.getOne("Users", "username", req.params.uname);
+        const dbAuth = await dbops.getOne("Auth", "username", req.params.uname);
+        dbUser.accessL = dbAuth.accessL;
         if(dbUser){
             if(cookieUsername === dbUser.username){
-                res.status(200).json(user);
+                console.log("USER IS "+JSON.stringify(user));
+                res.status(200).json(dbUser);
             }else{
                 res.status(403).json({"error": "access denied: unauthorized user"});
             }
@@ -193,29 +196,46 @@ app.delete("/api/user", async (req, res) => {
         //await dbops.deleteUser(req.body.uname)
         await dbops.deleteOne("Users", "username", req.body.username)
         await dbops.deleteOne("Auth", "username", req.body.username)
-        res.sendStatus(204)
+        res.sendStatus(204);
     }catch(e){
-        res.sendStatus(500)
+        res.sendStatus(500);
     }
 })
-
 app.put("/api/user", async (req, res) => {
+    console.log("YES")
+    const userChangeArr = [];
+    const authChangeArr = [];
+    if(!req.body.username){
+        return res.status(400).json({"error": "username not included into the request"});
+    }
+    userChangeArr.push(["username", req.body.username]);
+    authChangeArr.push(["username", req.body.username]);
+    if(req.body.email){
+        userChangeArr.push(["email", req.body.email]);
+    }
+    if(req.body.fName){
+        userChangeArr.push(["fName", req.body.fName]);
+    }
+    if(req.body.lName){
+        userChangeArr.push(["lName", req.body.lName]);
+    }
+    if(req.body.password){
+        authChangeArr.push(["password", req.body.password]);
+    }
+    if(req.body.accessL){
+        authChangeArr.push(["accessL", req.body.accessL]);
+    }
     try{
-        await dbops.alterOne("Users", "username", [
-            ["username", req.body.username],
-            ["accessL", req.body.accessL],
-            ["email", req.body.email],
-            ["fName", req.body.fName],
-            ["lName", req.body.lName]
-        ])
-        await dbops.alterOne("Auth", "username", [
-            ["username", req.body.username],
-            ["password", req.body.password]
-        ])
-        res.sendStatus(204)
+        if(userChangeArr.length > 1){
+            console.log(userChangeArr);
+            await dbops.alterOne("Users", "username", userChangeArr);
+        }
+        if(authChangeArr.length > 1){
+            await dbops.alterOne("Auth", "username", authChangeArr);
+        }
+        return res.sendStatus(204);
     }catch(e){
-        console.log(e)
-        res.sendStatus(500)
+        return res.sendStatus(500);
     }
 })
 

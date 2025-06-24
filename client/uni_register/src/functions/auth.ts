@@ -201,6 +201,45 @@ export async function getUserInfo(username: string): Promise<UserInfo | number>{
         }
         return foundUser;
     }catch(error2){
-        return 3; // technical error
+        return 3; // server error
+    }
+}
+
+export async function alterUser(user: User){
+    try{
+        let accessL: number | undefined = undefined;
+        switch(user.role){
+            case "student":
+                accessL = 0;
+                break;
+            case "teacher":
+                accessL = 1;
+                break;
+            case "admin":
+                accessL = 2;
+                break;
+        }
+        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user", {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                "fName": user.firstName,
+                "lName": user.lastName,
+                "username": user.username,
+                "password": user.password,
+                "accessL": accessL,
+                "email": user.email
+            })
+        })
+        if(response.ok){
+            return 0; // success
+        }else if(response.status == 400){
+            return 1; // no username provided
+        }
+    }catch(error){
+        return 2; // server error
     }
 }
