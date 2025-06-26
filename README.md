@@ -2,13 +2,15 @@
 ## created by Denys Hubskyi
 
 ## The system is capable of:
-### as per 24/06/2025:
+### as per 26/06/2025:
 - sign in and sign up users with different roles (teachers, students)
 - keep them securely logged in during the same session unless they log out
 - redirect them to the appropriate windows depending on their roles
 - teachers view students list
 - users change their personal details (first, last names) and security details (password, email)
 - users are able to delete their accounts
+- users are greeted with a message showing the weather in their approximate geolocation
+- admin dashboard created, GraphQL admin backend created
 ### planned:
 - enroling to courses by students
 - submitting files by students
