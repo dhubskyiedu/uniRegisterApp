@@ -63,7 +63,7 @@ export default function SignIn() {
     }
     return (
         <div className="text-2xl text-black flex flex-col justify-center items-center p-10">
-            <h1 className="text-8xl text-sky-500 text-center">Sign up</h1>
+            <h1 className="text-8xl text-sky-500 text-center">Sign in</h1>
             <form className="mt-10">
                 <label>
                     {emptyFields.includes("username") ? <span className="text-red-500">Username</span> : <span>Username</span>}

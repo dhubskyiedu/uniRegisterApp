@@ -2,6 +2,7 @@ import { useState } from 'react';
 import TopNav from '../../reusable/top';
 import Account from '../account';
 import Security from '../security';
+import WelcomePage from '../welcomePage';
 
 type StudentTopProps = {
 
@@ -27,7 +28,11 @@ export default function StudentTop(props: StudentTopProps){
           {(() => {
             if (shownMenu === "account") return <Account switchToSecurityMenu={() => setShownMenu("security")}></Account>;
             if (shownMenu === "security") return <Security></Security>;
-            return "Unknown Role";
+            return <div className="flex items-center justify-center p-10">
+              <div className="text-center flex items-center justify-center">
+                <WelcomePage></WelcomePage>
+              </div>
+            </div>;
           })()}
         </div>
     );

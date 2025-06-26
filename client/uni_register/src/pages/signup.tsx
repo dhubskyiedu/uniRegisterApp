@@ -123,6 +123,8 @@ export default function SignUp() {
                         location.replace("/student/"+username);
                     }else if(user.role == "teacher"){
                         location.replace("/teacher/"+username);
+                    }else if(user.role == "admin"){
+                        location.replace("/admin/"+username);
                     }
                 }else{
                     alert("Error");
