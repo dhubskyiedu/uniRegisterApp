@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { validatePassword, validateEmail, validateUsername, createUser } from "../functions/auth";
-import { User } from "../interfaces/businessLogic";
+import { validatePassword, validateEmail, validateUsername, createUser, userAuth } from "../functions/auth";
+import { User, UserCreds } from "../interfaces/businessLogic";
 export default function SignUp() {
     const [email, setEmail] = useState("");
     const [firstName, setFirstName] = useState("");
@@ -113,13 +113,22 @@ export default function SignUp() {
             let successRegister = await createUser(user);
             if(successRegister == 0){
                 alert("Success");
-                if(user.role == "student"){
-                    location.replace("/student/"+username);
-                }else if(user.role == "teacher"){
-                    location.replace("/teacher/"+username);
+                let creds: UserCreds = {
+                    username:username,
+                    password: password
+                }
+                let success: number = await userAuth(creds);
+                if(!success){
+                    if(user.role == "student"){
+                        location.replace("/student/"+username);
+                    }else if(user.role == "teacher"){
+                        location.replace("/teacher/"+username);
+                    }
+                }else{
+                    alert("Error");
                 }
             }else{
-                alert(successRegister);
+                alert("Error");
             }
         }
     }

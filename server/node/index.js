@@ -73,7 +73,13 @@ app.post("/api/user", async (req, res) => {
         }
     }
     if(result){
-        res.sendStatus(204)
+        const token = jwt.sign(uname, process.env.ACCESS_SECRET);
+        return res.cookie('jwtToken', token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'Strict',
+            maxAge: 24 * 60 * 60 * 1000
+        }).sendStatus(204);
     }
 })
 
@@ -109,7 +115,6 @@ app.post("/api/user/verify", async(req, res) => {
         if(user){
             if(req.body.passwd == user.password){
                 const token = jwt.sign(user.username, process.env.ACCESS_SECRET);
-                console.log("MLP")
                 return res.cookie('jwtToken', token, {
                     httpOnly: true,
                     secure: false,
@@ -132,11 +137,9 @@ app.get("/api/user/:uname", async (req, res) => {
     const origin = req.headers.origin;
     const token = req.cookies.jwtToken;
     if(!token){
-        console.log("QWERTY")
         return res.status(401).json({"error": "invalid request: no jwt cookie"});
     }
     if(origin !== frontend){
-        console.log("ZAQ")
         return res.status(403).json({"error": "access denied: unauthorized frontend"});
     }
     try{
@@ -146,7 +149,6 @@ app.get("/api/user/:uname", async (req, res) => {
         dbUser.accessL = dbAuth.accessL;
         if(dbUser){
             if(cookieUsername === dbUser.username){
-                console.log("USER IS "+JSON.stringify(user));
                 res.status(200).json(dbUser);
             }else{
                 res.status(403).json({"error": "access denied: unauthorized user"});
@@ -267,13 +269,11 @@ app.put("/api/user", async (req, res) => {
 })
 
 
-
 app.post("/api/user/validate", async(req, res) => {
     try{
         user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
         if(user){
             if(req.body.passwd == user.password){
-                const token = jwt.sign(user.username, process.env.ACCESS_SECRET);
                 res.sendStatus(200);
             }else{
                 res.status(403).json({error: "wrong password"});
