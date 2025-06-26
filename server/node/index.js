@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require('cors');
 const dbops = require("./dbops");
+const graphql = require("./graphql");
 const app = express();
 const parser = require("body-parser");
 const jwt = require("jsonwebtoken");
@@ -10,8 +11,6 @@ require("dotenv").config();
 const PORT = 3001;
 const frontend = 'http://localhost:3000';
 app.use(cookieParser());
-
-
 
 app.use(parser.json());
 app.use(parser.urlencoded({extended: false}));
@@ -30,6 +29,7 @@ app.use(cors({
 
 app.listen(PORT, () => {
     console.log("Server is listening on port 3000");
+    graphql.launchGraphQL(3010);
 });
 
 
