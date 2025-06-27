@@ -1,6 +1,13 @@
 # A comprehensive web-based university recordkeeping system and LMS
 ## created by Denys Hubskyi
 
+![app logo](icon.png)
+
+## Instructions to run:
+- to run the app manually without the docker-compose, the following commands must be executed:
+    - *npm start* command from the *server/node* folder containing *index.js*
+    - *npm run dev* command from the *client/uni_register* folder
+
 ## The system is capable of:
 ### as per 27/06/2025:
 - sign in and sign up users with **different roles (teachers, students, admins)**
