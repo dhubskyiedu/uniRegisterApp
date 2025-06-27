@@ -8,11 +8,11 @@
 - redirect them to the appropriate windows depending on their roles
 - teachers view students list
 - users change their personal details (first, last names) and security details (password, email)
-- users are able to delete their acc*ounts
+- users are able to delete their accounts
 - users are greeted with a message **showing the weather in their approximate IP geolocation**
 - admin dashboard created, **GraphQL admin backend created**
 ### planned:
-- enroling to courses by students
+- enrolling to courses by students
 - **submitting files by students**
 - grading students by teachers
 - assigning students to groups by teachers
@@ -23,7 +23,7 @@
 
 ## The system consists of separate microservices:
 ### currently:
-- frontend: ReactTS (NextJS with TypeScript), run on port 3000
+- frontend: React (NextJS with TypeScript), run on port 3000
 - backend: NodeJS + SQLite, run on port 3001
 - GraphQL dashboard: Apollo, run on port 3010
 ### planned:
@@ -46,15 +46,15 @@
 - role-based authentication
 - **JWT secure http-only cookies session security**
 - dedicated frontend verification
-- Wiseful cyber secure RESTful API design (all verifications via POST requests, password verification exclusively at the backend)
+- Security-conscious RESTful API architecture (all verifications via POST requests, password verification exclusively at the backend)
 
 ## Future refinements
 ### Planned refinements
 - code linting in the entire project
 - cyber security audit of the entire project
 - unit and functional testing of the entire project
-- RESTful API optimization: standartization of server responses
-- interface and type standartization within the entire project
+- RESTful API optimization: standardization of server responses
+- interface and type standardization within the entire project
 - logging all server error messages in text files in a dedicated folder
 ## Considered refinements
 - finer microservices decoupling: establishing dedicated containers for handling the operations of each of the user types separately
