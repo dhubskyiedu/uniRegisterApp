@@ -1,7 +1,7 @@
 import { UserInfoContext } from "../../interfaces/businessLogic";
 import { useContext, useEffect, useState } from "react";
 
-const axios = require('axios');
+import axios from 'axios';
 export default function WelcomePage(){
     const [temp, setTemp] = useState(undefined);
     const userInfo = useContext(UserInfoContext);

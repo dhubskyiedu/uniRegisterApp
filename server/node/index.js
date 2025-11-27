@@ -5,6 +5,7 @@ const graphql = require("./graphql");
 const app = express();
 const parser = require("body-parser");
 const jwt = require("jsonwebtoken");
+const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 require("dotenv").config();
 
@@ -32,8 +33,6 @@ app.listen(PORT, () => {
     graphql.launchGraphQL(3010);
 });
 
-
-
 // USERS
 app.post("/api/user", async (req, res) => {
     uname = req.body.username
@@ -43,18 +42,18 @@ app.post("/api/user", async (req, res) => {
     lname = req.body.lName
     alevel = req.body.alevel
     result = false
-    console.log(req.body);
+    const hashedPasswd = await bcrypt.hash(passwd, 10);
     try{
         await dbops.createOne([
             ["Users", 
-                ["username", uname, 32], 
-                ["email", email, 32],
-                ["fName", fname, 32],
-                ["lName", lname, 32],
+                ["username", uname, 255], 
+                ["email", email, 255],
+                ["fName", fname, 255],
+                ["lName", lname, 255],
             ],
             ["Auth", 
-                ["username", uname, 32],
-                ["password", passwd, 32], 
+                ["username", uname, 255],
+                ["password", hashedPasswd, 255], 
                 ["accessL", alevel, 2]
             ]
         ])
@@ -85,23 +84,16 @@ app.post("/api/user", async (req, res) => {
 
 app.get("/api/user/validateuname/:uname", async (req, res) => {
     const origin = req.headers.origin;
-    console.log("A")
     if(origin !== frontend){
         return res.status(403).json({"error": "access denied: unauthorized frontend"});
     }
-    console.log("B")
     res.set("Access-Control-Allow-Origin", frontend);
-    console.log("C")
     try{
         const dbUser = await dbops.getOne("Users", "username", req.params.uname);
-        console.log("D")
         if(dbUser){
-            console.log("E")
             res.status(409).json({"error": "user exists"});
         }else{
-            console.log("F")
             res.sendStatus(200);
-            console.log("X")
         }
     }catch(error){
         console.log(error)
@@ -113,7 +105,8 @@ app.post("/api/user/verify", async(req, res) => {
     try{
         user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
         if(user){
-            if(req.body.passwd == user.password){
+            const passwdOk = await bcrypt.compare(req.body.passwd, user.password);
+            if(passwdOk){
                 const token = jwt.sign(user.username, process.env.ACCESS_SECRET);
                 return res.cookie('jwtToken', token, {
                     httpOnly: true,
