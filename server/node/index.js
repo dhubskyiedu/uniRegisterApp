@@ -267,7 +267,8 @@ app.post("/api/user/validate", async(req, res) => {
     try{
         user = await dbops.getOne("Auth", "username", req.body.uname ? req.body.uname: "");
         if(user){
-            if(req.body.passwd == user.password){
+            const passwdOk = await bcrypt.compare(req.body.passwd, user.password);
+            if(passwdOk){
                 res.sendStatus(200);
             }else{
                 res.status(403).json({error: "wrong password"});
