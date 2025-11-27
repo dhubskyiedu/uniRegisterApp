@@ -1,6 +1,5 @@
-import { UserInfo, UserInfoContext, User } from "../../interfaces/businessLogic";
-import { getStudents } from "../../functions/info";
-import { useEffect, useState, useContext } from "react";
+import { UserInfoContext, User } from "../../interfaces/businessLogic";
+import { useState, useContext } from "react";
 import { alterUser } from "../../functions/auth";
 
 type AccountMenuProps = {
