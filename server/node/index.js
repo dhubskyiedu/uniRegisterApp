@@ -242,7 +242,8 @@ app.put("/api/user", async (req, res) => {
         userChangeArr.push(["lName", req.body.lName]);
     }
     if(req.body.password){
-        authChangeArr.push(["password", req.body.password]);
+        const hashedPasswd = await bcrypt.hash(req.body.password, 10);
+        authChangeArr.push(["password", hashedPasswd]);
     }
     if(req.body.accessL){
         authChangeArr.push(["accessL", req.body.accessL]);
@@ -400,7 +401,6 @@ app.get("/api/groups", async (req, res) => {
     })
 })
 app.delete("/api/group", async (req, res) => {
-    //dbops.deleteGroup(req.body.groupID)
     dbops.deleteOne("Groups", "groupID", req.body.groupID)
     .then((result) => {
         res.sendStatus(204)
@@ -410,7 +410,6 @@ app.delete("/api/group", async (req, res) => {
     })
 })
 app.put("/api/group", async (req, res) => {
-    //dbops.alterGroup(req.body)
     dbops.alterOne("Groups", "groupID", [
         ["groupID", req.body.groupID],
         ["courseID", req.body.courseID]
