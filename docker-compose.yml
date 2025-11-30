@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   frontend:
     build:
@@ -8,8 +6,20 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - mynet
+    hostname: frontend
+
   backend:
     build:
       context: ./server
     ports:
       - "3001:3001"
+    networks:
+      - mynet
+    hostname: backend
+
+networks:
+  mynet:
+    driver: bridge
+    enable_ipv6: true
