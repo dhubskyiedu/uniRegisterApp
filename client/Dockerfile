@@ -1,11 +1,10 @@
-FROM node:20-alpine AS builder
+FROM node:20
+
 WORKDIR /app
 
-COPY uni_register/package*.json ./
+COPY uni_register/ ./
 
 RUN npm install
-
-COPY uni_register/ .
 
 EXPOSE 3000
 

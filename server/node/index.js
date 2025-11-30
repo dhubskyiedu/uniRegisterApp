@@ -10,6 +10,8 @@ const cookieParser = require('cookie-parser');
 require("dotenv").config();
 
 const PORT = 3001;
+const ADDRESS = "::";
+
 const frontend = 'http://localhost:3000';
 app.use(cookieParser());
 
@@ -28,8 +30,8 @@ app.use(cors({
     credentials: true
 }));
 
-app.listen(PORT, () => {
-    console.log("Server is listening on port 3000");
+app.listen(PORT, ADDRESS, () => {
+    console.log("Server is listening on port "+PORT);
     graphql.launchGraphQL(3010);
 });
 

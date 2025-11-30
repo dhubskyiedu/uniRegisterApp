@@ -1,6 +1,7 @@
 import { User, UserInfo, UserCreds } from "../interfaces/businessLogic";
 
 const SERVERPORT = 3001;
+const SERVERURL = "localhost";
 
 // Password validation
 /*
@@ -44,7 +45,7 @@ export function validateEmail(email: string): number{
 */
 export async function validateUsername(username: string): Promise<number>{
     try{
-        let url = "http://localhost:"+SERVERPORT+"/api/user/validateuname/"+username;
+        let url = "http://"+SERVERURL+":"+SERVERPORT+"/api/user/validateuname/"+username;
         const response = await fetch(url, {
             method: "GET",
         });
@@ -53,6 +54,7 @@ export async function validateUsername(username: string): Promise<number>{
         }else if(response.status == 409){
             return 1;
         }else{
+            console.log(response.status)
             alert(response.status)
             return 2;
         }
@@ -84,7 +86,7 @@ export async function createUser(user: User){
         return 1;
     }
     try{
-        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user", {
+        const response = await fetch("http://"+SERVERURL+":"+SERVERPORT+"/api/user", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -114,7 +116,7 @@ export async function createUser(user: User){
 // User authentication
 export async function userAuth(user: UserCreds): Promise<number>{
     try{
-        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/verify", {
+        const response = await fetch("http://"+SERVERURL+":"+SERVERPORT+"/api/user/verify", {
             method: "POST",
             credentials: "include",
             headers: {
@@ -147,7 +149,7 @@ export async function userAuth(user: UserCreds): Promise<number>{
 
 export async function userValPasswd(user: UserCreds): Promise<number>{
     try{
-        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/validate", {
+        const response = await fetch("http://"+SERVERURL+":"+SERVERPORT+"/api/user/validate", {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -179,7 +181,7 @@ export async function userValPasswd(user: UserCreds): Promise<number>{
 
 export async function userLogOut(): Promise<boolean>{
     try{
-        const result = await fetch("http://localhost:"+SERVERPORT+"/api/user/logout", {
+        const result = await fetch("http://"+SERVERURL+":"+SERVERPORT+"/api/user/logout", {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -200,7 +202,7 @@ export async function userLogOut(): Promise<boolean>{
 export async function getUserInfo(username: string): Promise<UserInfo | number>{
     try{
         
-        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user/"+username, {
+        const response = await fetch("http://"+SERVERURL+":"+SERVERPORT+"/api/user/"+username, {
             method: "GET",
             credentials: "include",
             headers: {
@@ -254,7 +256,7 @@ export async function alterUser(user: User){
                 accessL = 2;
                 break;
         }
-        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user", {
+        const response = await fetch("http://"+SERVERURL+":"+SERVERPORT+"/api/user", {
             method: "PUT",
             credentials: "include",
             headers: {
@@ -281,7 +283,7 @@ export async function alterUser(user: User){
 
 export async function deleteUser(username: string){
     try{
-        const response = await fetch("http://localhost:"+SERVERPORT+"/api/user", {
+        const response = await fetch("http://"+SERVERURL+":"+SERVERPORT+"/api/user", {
             method: "DELETE",
             credentials: "include",
             headers: {
